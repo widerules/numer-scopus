@@ -46,8 +46,9 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private FractalSplitterManager mSplitterManager;
 	private FractalPart mFractal;
 
-	Sprite mSpr;
-	Text mText;
+	private Sprite mSpr;
+	private Text mText;
+	private Bitmap mImage;
 
 	@Override
 	public void onLoadComplete() {
@@ -82,21 +83,6 @@ public class NumerScopusActivity extends BaseGameActivity {
 		mEngine.getFontManager().loadFont(mIntuitiveFont);
 
 		mSplitterManager = new FractalSplitterManager(mMetrics);
-		mFractal = mSplitterManager.getFractalPart(10);
-		mFractal.split(mSplitterManager, 10);
-
-		Bitmap image = Bitmap.createBitmap((int) mFractal.getWidth(),
-				(int) mFractal.getHeight(), Bitmap.Config.ARGB_8888);
-		Canvas c = new Canvas(image);
-		c.drawARGB(255, 255, 255, 255);
-		mFractal.draw(c);
-
-		mMapTexture = new BitmapTextureAtlas(512, 512,
-				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-		mMapTextureRegion = BitmapTextureAtlasTextureRegionFactory
-				.createFromSource(mMapTexture, new BitmapTextureSource(image),
-						0, 0);
-		mEngine.getTextureManager().loadTexture(mMapTexture);
 	}
 
 	@Override
@@ -105,46 +91,48 @@ public class NumerScopusActivity extends BaseGameActivity {
 
 		mScene = new Scene() {
 			
-			boolean isWorking = false;
-			
 			@Override
 			public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
 				super.onSceneTouchEvent(pSceneTouchEvent);
 				
 				try{
 					
-				if (pSceneTouchEvent.isActionDown() && !isWorking) {
-					isWorking = true;
+				if (pSceneTouchEvent.isActionDown()) {
 					
-					mScene.detachChild(mSpr);
-					mScene.detachChild(mText);
-					mEngine.getTextureManager().unloadTexture(mMapTexture);
-
-					int count = (new Random()).nextInt(100);
+					if(mSpr != null)
+						mScene.detachChild(mSpr);
+					if(mText != null)
+						mScene.detachChild(mText);
+					if(mMapTexture != null)
+						mEngine.getTextureManager().unloadTexture(mMapTexture);
+					if (mImage !=  null)
+						mImage.recycle();
+					
+					int count = ((new Random()).nextInt(199)) + 1;
 					mFractal = mSplitterManager.getFractalPart(count);
 					mFractal.split(mSplitterManager, count);
-
-					Bitmap image = Bitmap.createBitmap((int) mFractal
+					
+					mImage = Bitmap.createBitmap((int) mFractal
 							.getWidth(), (int) mFractal.getHeight(),
 							Bitmap.Config.ARGB_8888);
-					Canvas c = new Canvas(image);
+					Canvas c = new Canvas(mImage);
 					c.drawARGB(255, 255, 255, 255);
 					mFractal.draw(c);
 					
-					int textureSize = image.getWidth() <= 128 && image.getHeight() <= 128 ? 128
-										: image.getWidth() <= 256 && image.getHeight() <= 256 ? 256
-												: image.getWidth() <= 512 && image.getHeight() <= 512 ? 512
-														: image.getWidth() <= 1024 && image.getHeight() <= 1024 ? 1024
-																: image.getWidth() <= 2048 && image.getHeight() <= 2048 ? 2048 
+					int textureSize = mImage.getWidth() <= 128 && mImage.getHeight() <= 128 ? 128
+										: mImage.getWidth() <= 256 && mImage.getHeight() <= 256 ? 256
+												: mImage.getWidth() <= 512 && mImage.getHeight() <= 512 ? 512
+														: mImage.getWidth() <= 1024 && mImage.getHeight() <= 1024 ? 1024
+																: mImage.getWidth() <= 2048 && mImage.getHeight() <= 2048 ? 2048 
 																		: 4096;
 
 					mMapTexture = new BitmapTextureAtlas(textureSize, textureSize,
 							TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 					mMapTextureRegion = BitmapTextureAtlasTextureRegionFactory
 							.createFromSource(mMapTexture,
-									new BitmapTextureSource(image), 0, 0);
+									new BitmapTextureSource(mImage), 0, 0);
 					mEngine.getTextureManager().loadTexture(mMapTexture);
-
+						
 					mSpr = new Sprite(0, 0, mMapTextureRegion);
 					mScene.attachChild(mSpr);
 
@@ -156,10 +144,9 @@ public class NumerScopusActivity extends BaseGameActivity {
 									- (mText.getHeight() / 2));
 					mScene.attachChild(mText);
 					
-					isWorking = false;
 				}
 				} catch (Exception ex){
-					Log.d("NumerScopus", ex.getMessage());
+					Log.e("NumerScopus", "Error on touch: " + ex.getMessage(), ex);
 				}
 				
 				return true;
@@ -167,13 +154,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 		};
 
 		mScene.setBackground(new ColorBackground(0.09804f, 0.6274f, 0.8784f));
-
-		mSpr = new Sprite(0, 0, mMapTextureRegion);
-		mScene.attachChild(mSpr);
-
-		mText = new Text(0, 0, mIntuitiveFont, Integer
-				.toString(mMetrics.widthPixels)
-				+ " x " + Integer.toString(mMetrics.heightPixels));
+		
+		mText = new Text(0, 0, mIntuitiveFont, "Touch");
 		mText.setPosition((mMetrics.widthPixels / 2) - (mText.getWidth() / 2),
 				(mMetrics.heightPixels / 2) - (mText.getHeight() / 2));
 		mScene.attachChild(mText);

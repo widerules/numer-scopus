@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.util.Log;
 
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
 import com.kvadratin.numerscopus.fractal.splitter.IFractalSplitter;
@@ -36,30 +37,49 @@ public class FractalPart {
 	 * @param pSubpartCount
 	 *            Требуемое количество подобластей
 	 */
-	public void split(FractalSplitterManager pSplitterManager, int pSubpartCount) {
+	public int split(FractalSplitterManager pSplitterManager, int pSubpartCount) {
+		
+		int result = 0;
 		this.clear();
-
-		if (pSubpartCount == 1) {
+		
+		Log.d("NumerScopus", "Start split: pSubpartCount = " + Integer.toString(pSubpartCount)); 
+				
+		if (pSubpartCount <= 1) {
 			mSplitter = pSplitterManager
 					.getSplitter(FractalSplitterManager.EMPTY_SPLITTER);
 		} else {
-			mSplitter = pSplitterManager.getRandomSplitter();
-			mChild = mSplitter.split(this);
-
-			float maxSubpartArea = 0;
-			FractalPart maxSubpart = null;
-
-			for (FractalPart fp : mChild) {
-				if (fp.getFieldArea() > maxSubpartArea)
-					maxSubpart = fp;
+			if (mField.width() == mField.height()){
+				mSplitter = pSplitterManager.getRandomSplitter();
+			} else if (mField.width() > mField.height()){
+				mSplitter = pSplitterManager.getRandomSplitter(false);
+			} else {
+				mSplitter = pSplitterManager.getRandomSplitter(true);
 			}
+			
+			if (mSplitter != null) {
+				mChild = mSplitter.split(this);
 
-			int subpartCount = pSubpartCount / mChild.size();
-			for (FractalPart fp : mChild) {
-				fp.split(pSplitterManager, (fp == maxSubpart ? subpartCount
-						+ pSubpartCount % mChild.size() : subpartCount));
+				float maxSubpartArea = 0;
+				FractalPart maxSubpart = null;
+
+				for (FractalPart fp : mChild) {
+					if (fp.getFieldArea() > maxSubpartArea)
+						maxSubpart = fp;
+				}
+
+				int subpartCount = pSubpartCount / mChild.size();
+				for (FractalPart fp : mChild) {
+					fp.split(pSplitterManager, (fp == maxSubpart ? subpartCount
+							+ pSubpartCount % mChild.size() : subpartCount));
+				}
+			} else {
+				result = pSubpartCount;
 			}
 		}
+		
+		Log.d("NumerScopus", "End split: pSubpartCount = " + Integer.toString(pSubpartCount) + "; result = " + Integer.toString(result));
+		
+		return result;
 	}
 
 	/**

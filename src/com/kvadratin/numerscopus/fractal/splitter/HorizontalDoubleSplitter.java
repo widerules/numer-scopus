@@ -9,16 +9,18 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-public class HorizontalDoubleSplitter implements IFractalSplitter{
-	
+public class HorizontalDoubleSplitter implements IFractalSplitter {
+
 	@Override
 	public void draw(FractalPart pPart, Canvas pCanvas) {
 		Paint paint = new Paint();
 		paint.setARGB(255, 255, 109, 27);
 		paint.setStrokeWidth(3);
-		
-		pCanvas.drawLine(pPart.getField().left, pPart.getField().top + pPart.getHeight() / 2, 
-				pPart.getField().right, pPart.getField().top + pPart.getHeight() / 2, paint);		
+
+		pCanvas.drawLine(pPart.getField().left, pPart.getField().top
+				+ pPart.getHeight() * this.getMinHeightFactor(), pPart
+				.getField().right, pPart.getField().top + pPart.getHeight()
+				* this.getMinHeightFactor(), paint);
 	}
 
 	@Override
@@ -29,13 +31,16 @@ public class HorizontalDoubleSplitter implements IFractalSplitter{
 	@Override
 	public HashSet<FractalPart> split(FractalPart pPart) {
 		HashSet<FractalPart> result = new HashSet<FractalPart>(2);
-		
-		result.add(new FractalPart(new RectF(pPart.getField().left, pPart.getField().top, 
-				pPart.getField().right, pPart.getField().top + pPart.getHeight() / 2)));
-		
-		result.add(new FractalPart(new RectF(pPart.getField().left, pPart.getField().top + pPart.getHeight() / 2, 
-				pPart.getField().right, pPart.getField().bottom)));
-		
+
+		result.add(new FractalPart(new RectF(pPart.getField().left, pPart
+				.getField().top, pPart.getField().right, pPart.getField().top
+				+ pPart.getHeight() * this.getMinHeightFactor())));
+
+		result.add(new FractalPart(new RectF(pPart.getField().left, pPart
+				.getField().top
+				+ pPart.getHeight() * this.getMinHeightFactor(), pPart.getField().right, pPart
+				.getField().bottom)));
+
 		return result;
 	}
 

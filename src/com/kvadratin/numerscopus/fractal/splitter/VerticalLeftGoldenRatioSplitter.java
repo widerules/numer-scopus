@@ -2,13 +2,13 @@ package com.kvadratin.numerscopus.fractal.splitter;
 
 import java.util.HashSet;
 
-import com.kvadratin.numerscopus.fractal.FractalPart;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-public class VerticalDoubleSplitter implements IFractalSplitter {
+import com.kvadratin.numerscopus.fractal.FractalPart;
+
+public class VerticalLeftGoldenRatioSplitter implements IFractalSplitter {
 
 	@Override
 	public void draw(FractalPart pPart, Canvas pCanvas) {
@@ -17,14 +17,35 @@ public class VerticalDoubleSplitter implements IFractalSplitter {
 		paint.setStrokeWidth(3);
 
 		pCanvas.drawLine(pPart.getField().left + pPart.getWidth()
-				* this.getMinWidthFactor(), pPart.getField().top, pPart.getField().left
+				* this.getMinWidthFactor(), pPart.getField().top, pPart
+				.getField().left
 				+ pPart.getWidth() * this.getMinWidthFactor(),
 				pPart.getField().bottom, paint);
 	}
 
 	@Override
+	public float getFillFactor() {
+		return 1f;
+	}
+
+	@Override
 	public int getId() {
-		return FractalSplitterManager.VERTICAL_DOUBLE_SPLITTER;
+		return FractalSplitterManager.VERTICAL_LEFT_GOLDEN_RATIO_SPLITTER;
+	}
+
+	@Override
+	public float getMinHeightFactor() {
+		return 1f;
+	}
+
+	@Override
+	public float getMinWidthFactor() {
+		return 0.382f;
+	}
+
+	@Override
+	public int getSubpartCount() {
+		return 2;
 	}
 
 	@Override
@@ -43,23 +64,4 @@ public class VerticalDoubleSplitter implements IFractalSplitter {
 		return result;
 	}
 
-	@Override
-	public float getFillFactor() {
-		return 1;
-	}
-
-	@Override
-	public float getMinHeightFactor() {
-		return 1;
-	}
-
-	@Override
-	public float getMinWidthFactor() {
-		return 0.5f;
-	}
-
-	@Override
-	public int getSubpartCount() {
-		return 2;
-	}
 }
