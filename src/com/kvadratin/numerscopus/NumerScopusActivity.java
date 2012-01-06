@@ -7,14 +7,20 @@ import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.primitive.Rectangle;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.entity.util.FPSLogger;
+import org.anddev.andengine.extension.svg.opengl.texture.atlas.bitmap.SVGBitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
+import org.anddev.andengine.opengl.font.FontLibrary;
+import org.anddev.andengine.opengl.font.FontManager;
+import org.anddev.andengine.opengl.font.StrokeFont;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -24,11 +30,15 @@ import org.anddev.andengine.ui.activity.BaseGameActivity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.graphics.Paint.FontMetrics;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.kvadratin.numerscopus.fractal.FractalPart;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
+import com.kvadratin.numerscopus.ornament.OrnamentManager;
 import com.kvadratin.numerscopus.utils.BitmapTextureSource;
 
 public class NumerScopusActivity extends BaseGameActivity {
@@ -45,10 +55,13 @@ public class NumerScopusActivity extends BaseGameActivity {
 
 	private FractalSplitterManager mSplitterManager;
 	private FractalPart mFractal;
+	private OrnamentManager mOrnamentManager;
 
+	private Sprite mOrnament;
 	private Sprite mSpr;
-	private Text mText;
+	private ChangeableText mText;
 	private Bitmap mImage;
+	private Rectangle mRect;
 
 	@Override
 	public void onLoadComplete() {
@@ -72,17 +85,20 @@ public class NumerScopusActivity extends BaseGameActivity {
 
 	@Override
 	public void onLoadResources() {
+		SVGBitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 		FontFactory.setAssetBasePath("fonts/");
 
-		mIntFontTexture = new BitmapTextureAtlas(256, 256,
+		mIntFontTexture = new BitmapTextureAtlas(512, 512,
 				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 		mIntuitiveFont = FontFactory.createFromAsset(mIntFontTexture, this,
-				"intuitive.ttf", 32, true, Color.argb(255, 0, 0, 57));
+				"intuitive.ttf", 100, true, Color.argb(255, 0, 255, 255));
 
 		mEngine.getTextureManager().loadTexture(mIntFontTexture);
 		mEngine.getFontManager().loadFont(mIntuitiveFont);
 
 		mSplitterManager = new FractalSplitterManager(mMetrics);
+		mOrnamentManager = new OrnamentManager(this, "gfx", mEngine
+				.getTextureManager(), 256);
 	}
 
 	@Override
@@ -90,74 +106,139 @@ public class NumerScopusActivity extends BaseGameActivity {
 		mEngine.registerUpdateHandler(new FPSLogger());
 
 		mScene = new Scene() {
-			
+
 			@Override
 			public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
 				super.onSceneTouchEvent(pSceneTouchEvent);
-				
-				try{
-					
-				if (pSceneTouchEvent.isActionDown()) {
-					
-					if(mSpr != null)
-						mScene.detachChild(mSpr);
-					if(mText != null)
-						mScene.detachChild(mText);
-					if(mMapTexture != null)
-						mEngine.getTextureManager().unloadTexture(mMapTexture);
-					if (mImage !=  null)
-						mImage.recycle();
-					
-					int count = ((new Random()).nextInt(199)) + 1;
-					mFractal = mSplitterManager.getFractalPart(count);
-					mFractal.split(mSplitterManager, count);
-					
-					mImage = Bitmap.createBitmap((int) mFractal
-							.getWidth(), (int) mFractal.getHeight(),
-							Bitmap.Config.ARGB_8888);
-					Canvas c = new Canvas(mImage);
-					c.drawARGB(255, 255, 255, 255);
-					mFractal.draw(c);
-					
-					int textureSize = mImage.getWidth() <= 128 && mImage.getHeight() <= 128 ? 128
-										: mImage.getWidth() <= 256 && mImage.getHeight() <= 256 ? 256
-												: mImage.getWidth() <= 512 && mImage.getHeight() <= 512 ? 512
-														: mImage.getWidth() <= 1024 && mImage.getHeight() <= 1024 ? 1024
-																: mImage.getWidth() <= 2048 && mImage.getHeight() <= 2048 ? 2048 
-																		: 4096;
 
-					mMapTexture = new BitmapTextureAtlas(textureSize, textureSize,
-							TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-					mMapTextureRegion = BitmapTextureAtlasTextureRegionFactory
-							.createFromSource(mMapTexture,
-									new BitmapTextureSource(mImage), 0, 0);
-					mEngine.getTextureManager().loadTexture(mMapTexture);
+				try {
+
+					if (pSceneTouchEvent.isActionDown()) {
+
+						if (mSpr != null)
+							mScene.detachChild(mSpr);
+						if (mText != null)
+							mScene.detachChild(mText);
+						if (mMapTexture != null)
+							mEngine.getTextureManager().unloadTexture(
+									mMapTexture);
+						if (mImage != null)
+							mImage.recycle();
+						if (mRect != null)
+							mScene.detachChild(mRect);
+						if (mOrnament != null)
+							mScene.detachChild(mOrnament);
+
+						int count = ((new Random()).nextInt(199)) + 1;
+						mFractal = mSplitterManager.getFractalPart(count);
+						mFractal.split(mSplitterManager, count);
+
+						mImage = Bitmap.createBitmap((int) mFractal.getWidth(),
+								(int) mFractal.getHeight(),
+								Bitmap.Config.ARGB_8888);
+						Canvas c = new Canvas(mImage);
+						c.drawARGB(255, 255, 255, 255);
+						mFractal.draw(c);
+
+						int textureSize = mImage.getWidth() <= 128
+								&& mImage.getHeight() <= 128 ? 128 : mImage
+								.getWidth() <= 256
+								&& mImage.getHeight() <= 256 ? 256 : mImage
+								.getWidth() <= 512
+								&& mImage.getHeight() <= 512 ? 512 : mImage
+								.getWidth() <= 1024
+								&& mImage.getHeight() <= 1024 ? 1024 : mImage
+								.getWidth() <= 2048
+								&& mImage.getHeight() <= 2048 ? 2048 : 4096;
+
+						mMapTexture = new BitmapTextureAtlas(textureSize,
+								textureSize,
+								TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+						mMapTextureRegion = BitmapTextureAtlasTextureRegionFactory
+								.createFromSource(mMapTexture,
+										new BitmapTextureSource(mImage), 0, 0);
+						mEngine.getTextureManager().loadTexture(mMapTexture);
+
+						mSpr = new Sprite(0, 0, mMapTextureRegion);
+						mScene.attachChild(mSpr);
 						
-					mSpr = new Sprite(0, 0, mMapTextureRegion);
-					mScene.attachChild(mSpr);
+						final Random rand = new Random();
+						mText.setText(Integer.toString(count));
+						mText.setColor(68 / 255, 24 / 255, 24 / 255);
+						mText.setScaleCenter(0, 0);
+						mText.setScale(rand.nextFloat() * 0.5f + 0.4f, 
+								rand.nextFloat() * 0.5f + 0.4f);
+						mText.setRotation(mText.getRotation() + 90);
 
-					mText = new Text(0, 0, mIntuitiveFont, Integer
-							.toString(count));
-					mText.setPosition((mMetrics.widthPixels / 2)
-							- (mText.getWidth() / 2),
-							(mMetrics.heightPixels / 2)
-									- (mText.getHeight() / 2));
-					mScene.attachChild(mText);
-					
+						Log.d("NumerScopus", "AAAAA 0 "
+								+ Integer.toString(count));
+						Log.d("NumerScopus", "AAAAA 1 "
+								+ Float.toString(mText.getScaleX()) + " "
+								+ Float.toString(mText.getScaleY()));
+						Log.d("NumerScopus", "AAAAA 2 "
+								+ Float.toString(mText.getWidthScaled())
+								+ " x "
+								+ Float.toString(mText.getHeightScaled()));
+						Log.d("NumerScopus", "AAAAA 3 "
+								+ Float.toString(mText.getWidth()) + " x "
+								+ Float.toString(mText.getHeight()));
+
+						mText.setPosition((mMetrics.widthPixels * 0.5f)
+								- (mText.getWidthScaled() * 0.5f),
+								(mMetrics.heightPixels * 0.5f)
+										- (mText.getHeightScaled() * 0.5f));
+
+						mRect.setWidth(mText.getWidthScaled());
+						mRect.setHeight(mText.getHeightScaled());
+						mRect.setRotationCenter(mText.getRotationCenterX(),
+								mText.getRotationCenterY());
+						mRect.setRotation(mText.getRotation());
+						mRect.setPosition(mText.getX(), mText.getY());
+						
+						int ornId = rand.nextInt(mOrnamentManager.getOrnamentCount());
+						
+						mOrnament = mOrnamentManager.getSprite(ornId, new RectF(
+								mRect.getX(), mRect.getY(), mRect.getX()
+										+ mRect.getWidthScaled(), mRect.getY()
+										+ mRect.getHeightScaled()));
+						mOrnament.setRotationCenter(mRect.getRotationCenterX(),
+								mRect.getRotationCenterY());
+						mOrnament.setRotation(mRect.getRotation());
+
+						mScene.attachChild(mRect);
+						mScene.attachChild(mOrnament);
+						mScene.attachChild(mText);
+
+					}
+				} catch (Exception ex) {
+					Log.e("NumerScopus", "Error on touch: " + ex.getMessage(),
+							ex);
 				}
-				} catch (Exception ex){
-					Log.e("NumerScopus", "Error on touch: " + ex.getMessage(), ex);
-				}
-				
+
 				return true;
 			}
 		};
 
 		mScene.setBackground(new ColorBackground(0.09804f, 0.6274f, 0.8784f));
-		
-		mText = new Text(0, 0, mIntuitiveFont, "Touch");
-		mText.setPosition((mMetrics.widthPixels / 2) - (mText.getWidth() / 2),
-				(mMetrics.heightPixels / 2) - (mText.getHeight() / 2));
+
+		mText = new ChangeableText(0, 0, mIntuitiveFont, "0123456789");
+		mText.setScaleCenter(0, 0);
+		mText.setScale(0.5f);
+
+		mText.setPosition((mMetrics.widthPixels / 2)
+				- (mText.getWidthScaled() / 2), (mMetrics.heightPixels / 2)
+				- (mText.getHeightScaled() / 2));
+
+		mRect = new Rectangle(mText.getX(), mText.getY(), mText
+				.getWidthScaled(), mText.getHeightScaled());
+		mRect.setColor(1f, 1f, 1f);
+
+		mOrnament = mOrnamentManager.getSprite(0, new RectF(mRect.getX(), mRect
+				.getY(), mRect.getX() + mRect.getWidthScaled(), mRect.getY()
+				+ mRect.getHeightScaled()));
+
+		mScene.attachChild(mRect);
+		mScene.attachChild(mOrnament);
 		mScene.attachChild(mText);
 
 		return mScene;
