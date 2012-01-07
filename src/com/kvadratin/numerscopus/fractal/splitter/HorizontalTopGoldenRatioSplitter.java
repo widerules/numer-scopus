@@ -1,7 +1,5 @@
 package com.kvadratin.numerscopus.fractal.splitter;
 
-import java.util.HashSet;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -48,17 +46,17 @@ public class HorizontalTopGoldenRatioSplitter implements IFractalSplitter {
 	}
 
 	@Override
-	public HashSet<FractalPart> split(FractalPart pPart) {
-		HashSet<FractalPart> result = new HashSet<FractalPart>(2);
+	public FractalPart[] split(FractalPart pPart) {
+		FractalPart[] result = new FractalPart[2];
 
-		result.add(new FractalPart(new RectF(pPart.getField().left, pPart
+		result[0] = new FractalPart(new RectF(pPart.getField().left, pPart
 				.getField().top, pPart.getField().right, pPart.getField().top
-				+ pPart.getHeight() * this.getMinHeightFactor())));
+				+ pPart.getHeight() * this.getMinHeightFactor()));
 
-		result.add(new FractalPart(new RectF(pPart.getField().left, pPart
+		result[1] = new FractalPart(new RectF(pPart.getField().left, pPart
 				.getField().top
 				+ pPart.getHeight() * this.getMinHeightFactor(), pPart
-				.getField().right, pPart.getField().bottom)));
+				.getField().right, pPart.getField().bottom));
 
 		return result;
 	}

@@ -35,7 +35,7 @@ public class FractalSplitterManager {
 	 * вертикали
 	 */
 	public final static int VERTICAL_SPLITTERS_COUNT = 3;
-
+	
 	/**
 	 * Идентификатор путого алгоритма разбиения
 	 * 

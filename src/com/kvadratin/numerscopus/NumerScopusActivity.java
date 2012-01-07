@@ -1,5 +1,6 @@
 package com.kvadratin.numerscopus;
 
+import java.io.IOException;
 import java.util.Random;
 
 import org.anddev.andengine.engine.Engine;
@@ -12,27 +13,23 @@ import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.extension.svg.opengl.texture.atlas.bitmap.SVGBitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
 import org.anddev.andengine.opengl.font.FontLibrary;
-import org.anddev.andengine.opengl.font.FontManager;
-import org.anddev.andengine.opengl.font.StrokeFont;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.RectF;
-import android.graphics.Typeface;
-import android.graphics.Paint.FontMetrics;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -50,18 +47,48 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private BitmapTextureAtlas mMapTexture;
 	private TextureRegion mMapTextureRegion;
 
-	private BitmapTextureAtlas mIntFontTexture;
-	private Font mIntuitiveFont;
-
 	private FractalSplitterManager mSplitterManager;
 	private FractalPart mFractal;
 	private OrnamentManager mOrnamentManager;
+
+	private FontLibrary mFontLibrary;
+	private int mFontsCount;
 
 	private Sprite mOrnament;
 	private Sprite mSpr;
 	private ChangeableText mText;
 	private Bitmap mImage;
 	private Rectangle mRect;
+
+	private void loadFonts() {
+		AssetManager manager = this.getAssets();
+
+		try {
+			String list[] = manager.list("fonts");
+			mFontLibrary = new FontLibrary(list.length);
+			mFontsCount = list.length;
+
+			for (int i = 0; i < list.length; i++) {
+				try {
+					// TODO: Texture size, must be relative to font size
+					BitmapTextureAtlas fontTexture = new BitmapTextureAtlas(
+							512, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+					// TODO: Font size, must be relative to display metrics
+					Font font = FontFactory.createFromAsset(fontTexture, this,
+							list[i], 120, true, Color.argb(255, 68, 24, 24));
+
+					mEngine.getTextureManager().loadTexture(fontTexture);
+					mFontLibrary.put(i, font);
+				} catch (Exception ex) {
+					Log.e("NumerScopus", "Error on load font", ex);
+				}
+			}
+		} catch (IOException ex) {
+			Log.e("NumerScopus", "Error on get list of fonts", ex);
+		}
+
+		mEngine.getFontManager().loadFonts(mFontLibrary);
+	}
 
 	@Override
 	public void onLoadComplete() {
@@ -86,19 +113,13 @@ public class NumerScopusActivity extends BaseGameActivity {
 	@Override
 	public void onLoadResources() {
 		SVGBitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
+		
 		FontFactory.setAssetBasePath("fonts/");
-
-		mIntFontTexture = new BitmapTextureAtlas(512, 512,
-				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-		mIntuitiveFont = FontFactory.createFromAsset(mIntFontTexture, this,
-				"intuitive.ttf", 100, true, Color.argb(255, 0, 255, 255));
-
-		mEngine.getTextureManager().loadTexture(mIntFontTexture);
-		mEngine.getFontManager().loadFont(mIntuitiveFont);
+		this.loadFonts();
 
 		mSplitterManager = new FractalSplitterManager(mMetrics);
-		mOrnamentManager = new OrnamentManager(this, "gfx", mEngine
-				.getTextureManager(), 256);
+		// TODO: Texture size, must be relative to display metrics
+		mOrnamentManager = new OrnamentManager(this, "gfx", mEngine.getTextureManager(), 256);
 	}
 
 	@Override
@@ -130,8 +151,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 							mScene.detachChild(mOrnament);
 
 						int count = ((new Random()).nextInt(199)) + 1;
-						mFractal = mSplitterManager.getFractalPart(count);
-						mFractal.split(mSplitterManager, count);
+						mFractal = mSplitterManager.getFractalPart(count);						
+						FractalPart.split(mFractal, count, mSplitterManager);
 
 						mImage = Bitmap.createBitmap((int) mFractal.getWidth(),
 								(int) mFractal.getHeight(),
@@ -161,14 +182,15 @@ public class NumerScopusActivity extends BaseGameActivity {
 
 						mSpr = new Sprite(0, 0, mMapTextureRegion);
 						mScene.attachChild(mSpr);
-						
+
 						final Random rand = new Random();
-						mText.setText(Integer.toString(count));
+						mText = new ChangeableText(0, 0, mFontLibrary.get(rand
+								.nextInt(mFontsCount)), Integer.toString(count));
+						// mText.setText(Integer.toString(count));
 						mText.setColor(68 / 255, 24 / 255, 24 / 255);
 						mText.setScaleCenter(0, 0);
-						mText.setScale(rand.nextFloat() * 0.5f + 0.4f, 
-								rand.nextFloat() * 0.5f + 0.4f);
-						mText.setRotation(mText.getRotation() + 90);
+						//mText.setScale(rand.nextFloat() * 0.5f + 0.4f, rand.nextFloat() * 0.5f + 0.4f);
+						// mText.setRotation(mText.getRotation() + 90);
 
 						Log.d("NumerScopus", "AAAAA 0 "
 								+ Integer.toString(count));
@@ -194,11 +216,13 @@ public class NumerScopusActivity extends BaseGameActivity {
 								mText.getRotationCenterY());
 						mRect.setRotation(mText.getRotation());
 						mRect.setPosition(mText.getX(), mText.getY());
-						
-						int ornId = rand.nextInt(mOrnamentManager.getOrnamentCount());
-						
-						mOrnament = mOrnamentManager.getSprite(ornId, new RectF(
-								mRect.getX(), mRect.getY(), mRect.getX()
+
+						int ornId = rand.nextInt(mOrnamentManager
+								.getOrnamentCount());
+
+						mOrnament = mOrnamentManager.getSprite(ornId,
+								new RectF(mRect.getX(), mRect.getY(), mRect
+										.getX()
 										+ mRect.getWidthScaled(), mRect.getY()
 										+ mRect.getHeightScaled()));
 						mOrnament.setRotationCenter(mRect.getRotationCenterX(),
@@ -221,7 +245,7 @@ public class NumerScopusActivity extends BaseGameActivity {
 
 		mScene.setBackground(new ColorBackground(0.09804f, 0.6274f, 0.8784f));
 
-		mText = new ChangeableText(0, 0, mIntuitiveFont, "0123456789");
+		mText = new ChangeableText(0, 0, mFontLibrary.get((new Random()).nextInt(mFontsCount)), "01234567890");
 		mText.setScaleCenter(0, 0);
 		mText.setScale(0.5f);
 
