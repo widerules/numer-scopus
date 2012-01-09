@@ -296,7 +296,23 @@ public class FractalPart {
 	public float getFieldArea() {
 		return this.getWidth() * this.getHeight();
 	}
-
+	
+	/**
+	 * Вернет позицию по X
+	 * @return
+	 */
+	public float getX(){
+		return mField.left;
+	}
+	
+	/**
+	 * Вернет позицию по Y
+	 * @return
+	 */
+	public float getY(){
+		return mField.top;
+	}
+	
 	/**
 	 * Вернет поле области
 	 * 

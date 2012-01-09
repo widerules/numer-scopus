@@ -1,6 +1,7 @@
 package com.kvadratin.numerscopus.fractal.splitter;
 
 import com.kvadratin.numerscopus.fractal.FractalPart;
+import com.kvadratin.numerscopus.fractal.NumberFractalPart;
 
 import android.graphics.Canvas;
 
@@ -17,7 +18,10 @@ public class EmptySplitter implements IFractalSplitter{
 
 	@Override
 	public FractalPart[] split(FractalPart pPart) {
-		return new FractalPart[1];
+		FractalPart[] result = new FractalPart[1];
+		result[0] = new NumberFractalPart(pPart.getField());
+		
+		return result;
 	}
 
 	@Override
