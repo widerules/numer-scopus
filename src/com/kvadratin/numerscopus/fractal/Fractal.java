@@ -55,25 +55,34 @@ public class Fractal {
 	 */
 	public void clear() {
 
-		if (mFractal != null) {
-
+		if (mNumbers != null)
 			for (int i = 0; i < mNumbers.length; i++) {
-				mScene.detachChild(mNumbers[i].getOrnamentSprite());
-				mScene.detachChild(mNumbers[i].getNumberText());
+				if (mNumbers[i] != null) {
+					Sprite ornament = mNumbers[i].getOrnamentSprite();
+					if (ornament != null)
+						mScene.detachChild(ornament);
+
+					Text number = mNumbers[i].getNumberText();
+					if (number != null)
+						mScene.detachChild(number);
+				}
 			}
 
+		if (mFractalSprite != null)
 			mScene.detachChild(mFractalSprite);
+		if (mFractalTexture != null)
 			mTextures.unloadTexture(mFractalTexture);
 
+		if (mFractal != null)
 			mFractal.clear();
+		if (mFractalImage != null)
 			mFractalImage.recycle();
 
-			mNumbers = null;
-			mFractal = null;
-			mFractalSprite = null;
-			mFractalTexture = null;
-			mFractalImage = null;
-		}
+		mNumbers = null;
+		mFractal = null;
+		mFractalSprite = null;
+		mFractalTexture = null;
+		mFractalImage = null;
 
 	}
 
@@ -83,9 +92,10 @@ public class Fractal {
 	 * @param pSubpartCount
 	 *            Требуемое количество подобластей
 	 */
-	public void split(final int pSubpartCount) {
+	public void split(int pSubpartCount) {
 
 		this.clear();
+		pSubpartCount = pSubpartCount > 0 ? pSubpartCount : 1;
 		mNumbers = new NumberFractalPart[pSubpartCount];
 		mFractal = mSplitters.getFractalPart(pSubpartCount);
 
@@ -133,10 +143,12 @@ public class Fractal {
 								+ ((part.getWidth() * 0.5f) - (txt
 										.getWidthScaled() + (10 * txt.getText()
 										.length() * txt.getScaleX())) * 0.5f),
-						part.getY() + ((part.getHeight() * 0.5f)) - (txt.getHeightScaled() * 0.5f));
+						part.getY() + ((part.getHeight() * 0.5f))
+								- (txt.getHeightScaled() * 0.5f));
 				// TODO: text rotation
 
-				part.init(mOrnaments.getSprite(ornamentId, part.getField()),
+				part.init(mOrnaments
+						.getSprite(ornamentId, part.getField(), (byte) rand.nextInt(OrnamentManager.FILL_METHODS_COUNT)),
 						txt, num + 1, fontId, ornamentId);
 
 				mNumbers[num] = part;
@@ -210,7 +222,7 @@ public class Fractal {
 			mScene.attachChild(mNumbers[i].getOrnamentSprite());
 			mScene.attachChild(mNumbers[i].getNumberText());
 		}
-		
+
 		// Готовим рисунок разбиения и помещаем его на сцену
 		mFractalImage = Bitmap.createBitmap((int) mFractal.getWidth(),
 				(int) mFractal.getHeight(), Bitmap.Config.ARGB_8888);
@@ -239,7 +251,5 @@ public class Fractal {
 
 		mFractalSprite = new Sprite(0, 0, tr);
 		mScene.attachChild(mFractalSprite);
-
-		
 	}
 }

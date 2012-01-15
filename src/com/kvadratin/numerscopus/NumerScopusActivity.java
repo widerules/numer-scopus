@@ -100,7 +100,7 @@ public class NumerScopusActivity extends BaseGameActivity {
 
 		mSplitterManager = new FractalSplitterManager(mMetrics);
 		// TODO: Texture size, must be relative to display metrics
-		mOrnamentManager = new OrnamentManager(this, "gfx", mEngine
+		mOrnamentManager = new OrnamentManager(this, "gfx", "orn_", mEngine
 				.getTextureManager(), 256);
 	}
 
@@ -114,14 +114,16 @@ public class NumerScopusActivity extends BaseGameActivity {
 			public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
 				super.onSceneTouchEvent(pSceneTouchEvent);
 
-				try {
+				//try {
 					if (pSceneTouchEvent.isActionDown()) {
-						mFractal.split((new Random()).nextInt(200));						
+						Log.d("NumerScopus", "Start split");
+						mFractal.split((new Random()).nextInt(20));
+						Log.d("NumerScopus", "End split");
 					}
-				} catch (Exception ex) {
-					Log.e("NumerScopus", "Error on touch: " + ex.getMessage(),
-							ex);
-				}
+				//} catch (Exception ex) {
+				//	Log.e("NumerScopus", "Error on touch: " + ex.getMessage(),
+				//			ex);
+				//}
 
 				return true;
 			}

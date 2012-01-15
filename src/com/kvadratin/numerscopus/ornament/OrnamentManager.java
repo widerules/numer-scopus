@@ -21,15 +21,15 @@ import android.util.Log;
  * @author bargatin
  * @since 2012-01-06
  */
-public class OrnamentManager {
+public class OrnamentManager implements IOrnamentManager {
 
 	// --------------------------------------------------------------------
 	// Константы
 	// --------------------------------------------------------------------
 	/**
-	 * Префикс SVG файлов, содержащих орнаменты
+	 * Количество методов заполнения спрайта.
 	 */
-	public static final String ORNAMENT_NAME_PREFIX = "orn_";
+	public static final byte FILL_METHODS_COUNT = 9;
 
 	// --------------------------------------------------------------------
 	// Поля
@@ -37,6 +37,7 @@ public class OrnamentManager {
 	private int mTextureSize;
 	private BitmapTextureAtlas[] mTextures;
 	private TextureRegion[] mRegions;
+	private TextureManager mTextureManager;
 
 	// --------------------------------------------------------------------
 	// Конструкторы
@@ -47,13 +48,17 @@ public class OrnamentManager {
 	 * @param pAssetBasePath
 	 *            Название поддиректории assets/, в которой содержатся файлы
 	 *            орнаментов
+	 * @param pFileNamePrefix
+	 *            Префикс SVG файлов, содержащих орнаменты
 	 * @param pTextureSize
 	 *            Размер текстуры орнамента
 	 */
 	public OrnamentManager(final Context pContext, final String pAssetBasePath,
-			final TextureManager pTextureManager, final int pTextureSize) {
+			final String pFileNamePrefix, final TextureManager pTextureManager,
+			final int pTextureSize) {
 
 		mTextureSize = pTextureSize;
+		mTextureManager = pTextureManager;
 		AssetManager manager = pContext.getAssets();
 
 		try {
@@ -61,7 +66,7 @@ public class OrnamentManager {
 			int count = 0;
 
 			for (String name : list) {
-				if (name.startsWith(ORNAMENT_NAME_PREFIX))
+				if (name.startsWith(pFileNamePrefix))
 					count++;
 			}
 
@@ -73,7 +78,7 @@ public class OrnamentManager {
 				count = 0;
 
 				for (int i = 0; i < list.length; i++) {
-					if (list[i].startsWith(ORNAMENT_NAME_PREFIX)) {
+					if (list[i].startsWith(pFileNamePrefix)) {
 						try {
 							mTextures[count] = new BitmapTextureAtlas(
 									pTextureSize, pTextureSize,
@@ -84,7 +89,7 @@ public class OrnamentManager {
 											pContext, list[i], pTextureSize,
 											pTextureSize, 0, 0);
 
-							pTextureManager.loadTexture(mTextures[count]);
+							mTextureManager.loadTexture(mTextures[count]);
 							count++;
 
 						} catch (Exception ex) {
@@ -105,6 +110,7 @@ public class OrnamentManager {
 	/**
 	 * Количество орнаментов загруженных в менеджер
 	 */
+	@Override
 	public int getOrnamentCount() {
 		return mTextures.length;
 	}
@@ -115,6 +121,7 @@ public class OrnamentManager {
 	 * @param pOrnamentId
 	 *            Идентификатор орнамента
 	 */
+	@Override
 	public BitmapTextureAtlas getTexture(final int pOrnamentId) {
 		return mTextures[pOrnamentId];
 	}
@@ -125,6 +132,7 @@ public class OrnamentManager {
 	 * @param pOrnamentId
 	 *            Идентификатор орнамента
 	 */
+	@Override
 	public TextureRegion getTextureRegion(final int pOrnamentId) {
 		return mRegions[pOrnamentId];
 	}
@@ -136,21 +144,102 @@ public class OrnamentManager {
 	 *            Идентификатор орнамента
 	 * @param pField
 	 *            Поле под размеры которого будет подгонятся спрайт орнамента
+	 * @param pFillMethod
+	 *            Метод заполнения спрайта текстурой. pFillMethod <
+	 *            FILL_METHODS_COUNT
 	 */
-	public Sprite getSprite(final int pOrnamentId, RectF pField) {
+	@Override
+	public Sprite getSprite(final int pOrnamentId, RectF pField,
+			byte pFillMethod) {
+
+		pFillMethod = pFillMethod < 0 || pFillMethod >= FILL_METHODS_COUNT ? 0
+				: pFillMethod;
+
+		int x = 0;
+		int y = 0;
 
 		int width = (int) pField.width();
+		width = width < mTextureSize ? width : mTextureSize;
+
 		int height = (int) pField.height();
+		height = height < mTextureSize ? height : mTextureSize;
 
-		Sprite result = new Sprite(pField.left, pField.top, new TextureRegion(
-				mTextures[pOrnamentId], 0, 0, width < mTextureSize ? width
-						: mTextureSize, height < mTextureSize ? height
-						: mTextureSize));
+		int dX = mTextureSize - width;
+		int dY = mTextureSize - height;
 
-		result.setScaleCenter(0, 0);
-		result.setScaleX(pField.width() / result.getWidth());
-		result.setScaleY(pField.height() / result.getHeight());
+		float xScaleFactor = pField.width() / width;
+		float yScaleFactor = pField.height() / height;
+
+		switch (pFillMethod) {
+		case 0:
+			x = 0;
+			y = 0;
+			break;
+
+		case 1:
+			x = dX;
+			y = 0;
+			break;
+
+		case 2:
+			x = dX;
+			y = dY;
+			break;
+
+		case 3:
+			x = 0;
+			y = dY;
+			break;
+
+		case 4:
+			x = (int) (dX * 0.5f);
+			y = (int) (dY * 0.5f);
+			break;
+
+		case 5:
+			x = (int) (dX * 0.5f);
+			y = 0;
+			break;
+
+		case 6:
+			x = dX;
+			y = (int) (dY * 0.5f);
+			break;
+
+		case 7:
+			x = (int) (dX * 0.5f);
+			y = dY;
+			break;
+
+		case 8:
+			x = 0;
+			y = (int) (dY * 0.5f);
+			break;
+		}
+
+		// Создаем и масштабируем спрайт
+		Sprite result = null;
+
+		if (mTextures[pOrnamentId] != null) {
+			result = new Sprite(pField.left, pField.top, new TextureRegion(
+					mTextures[pOrnamentId], x, y, width, height));
+
+			result.setScaleCenter(0, 0);
+			result.setScaleX(xScaleFactor);
+			result.setScaleY(yScaleFactor);
+		}
 
 		return result;
+	}
+
+	@Override
+	public void clear() {
+		for (int i = 0; i < mTextures.length; i++) {
+			if (mTextures[i] != null)
+				mTextureManager.unloadTexture(mTextures[i]);
+
+			mTextures[i] = null;
+			mRegions[i] = null;
+		}
 	}
 }
