@@ -1,6 +1,5 @@
 package com.kvadratin.numerscopus;
 
-import java.io.IOException;
 import java.util.Random;
 
 import org.anddev.andengine.engine.Engine;
@@ -13,20 +12,18 @@ import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.extension.svg.opengl.texture.atlas.bitmap.SVGBitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.font.FontFactory;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
-import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.SparseArray;
 
+import com.kvadratin.numerscopus.font.FontManagerFactory;
+import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.Fractal;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
+import com.kvadratin.numerscopus.ornament.IOrnamentManager;
 import com.kvadratin.numerscopus.ornament.OrnamentManager;
 
 public class NumerScopusActivity extends BaseGameActivity {
@@ -36,40 +33,10 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private Scene mScene;
 
 	private FractalSplitterManager mSplitterManager;
-	private OrnamentManager mOrnamentManager;
-	private SparseArray<Font> mFontLibrary;
+	private IOrnamentManager mOrnamentManager;
+	private IFontManager mFontManager;
 
 	private Fractal mFractal;
-
-	private void loadFonts() {
-		AssetManager manager = this.getAssets();
-
-		try {
-			String list[] = manager.list("fonts");
-			mFontLibrary = new SparseArray<Font>(list.length);
-
-			for (int i = 0; i < list.length; i++) {
-				try {
-					// TODO: Texture size, must be relative to font size
-					BitmapTextureAtlas fontTexture = new BitmapTextureAtlas(
-							512, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-					// TODO: Font size, must be relative to display metrics
-					Font font = FontFactory.createFromAsset(fontTexture, this,
-							list[i], 120, true, Color.argb(255, 68, 24, 24));
-
-					mEngine.getTextureManager().loadTexture(fontTexture);
-					mFontLibrary.put(i, font);
-				} catch (Exception ex) {
-					Log.e("NumerScopus", "Error on load font", ex);
-				}
-			}
-		} catch (IOException ex) {
-			Log.e("NumerScopus", "Error on get list of fonts", ex);
-		}
-
-		for (int i = 0; i < mFontLibrary.size(); i++)
-			mEngine.getFontManager().loadFonts(mFontLibrary.get(i));
-	}
 
 	@Override
 	public void onLoadComplete() {
@@ -96,7 +63,11 @@ public class NumerScopusActivity extends BaseGameActivity {
 		SVGBitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 
 		FontFactory.setAssetBasePath("fonts/");
-		this.loadFonts();
+		// TODO: Font size, must be relative to display metrics
+		mFontManager = FontManagerFactory.createAssetFontManager(this, mEngine
+				.getFontManager(), mEngine.getTextureManager(), "fonts",
+				"base_", Color.argb(255, 68, 24, 24), Color.argb(255, 68, 24,
+						24), 120, 1, false);
 
 		mSplitterManager = new FractalSplitterManager(mMetrics);
 		// TODO: Texture size, must be relative to display metrics
@@ -114,25 +85,25 @@ public class NumerScopusActivity extends BaseGameActivity {
 			public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
 				super.onSceneTouchEvent(pSceneTouchEvent);
 
-				//try {
-					if (pSceneTouchEvent.isActionDown()) {
-						Log.d("NumerScopus", "Start split");
-						mFractal.split((new Random()).nextInt(20));
-						Log.d("NumerScopus", "End split");
-					}
-				//} catch (Exception ex) {
-				//	Log.e("NumerScopus", "Error on touch: " + ex.getMessage(),
-				//			ex);
-				//}
+				// try {
+				if (pSceneTouchEvent.isActionDown()) {
+					Log.d("NumerScopus", "Start split");
+					mFractal.split((new Random()).nextInt(20));
+					Log.d("NumerScopus", "End split");
+				}
+				// } catch (Exception ex) {
+				// Log.e("NumerScopus", "Error on touch: " + ex.getMessage(),
+				// ex);
+				// }
 
 				return true;
 			}
 		};
 
 		mScene.setBackground(new ColorBackground(1f, 1f, 1f));
-		
+
 		mFractal = new Fractal(mEngine.getTextureManager(), mScene,
-				mSplitterManager, mOrnamentManager, mFontLibrary, 1);
+				mSplitterManager, mOrnamentManager, mFontManager, 1);
 
 		return mScene;
 	}
