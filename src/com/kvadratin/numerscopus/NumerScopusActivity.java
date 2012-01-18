@@ -24,7 +24,7 @@ import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.Fractal;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
 import com.kvadratin.numerscopus.ornament.IOrnamentManager;
-import com.kvadratin.numerscopus.ornament.OrnamentManager;
+import com.kvadratin.numerscopus.ornament.OrnamentManagerFactory;
 
 public class NumerScopusActivity extends BaseGameActivity {
 
@@ -71,8 +71,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 
 		mSplitterManager = new FractalSplitterManager(mMetrics);
 		// TODO: Texture size, must be relative to display metrics
-		mOrnamentManager = new OrnamentManager(this, "gfx", "orn_", mEngine
-				.getTextureManager(), 256);
+		mOrnamentManager = OrnamentManagerFactory.createAssetOrnamentManager(
+				this, "gfx", "orn_", mEngine.getTextureManager(), 256);
 	}
 
 	@Override

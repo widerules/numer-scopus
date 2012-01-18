@@ -18,7 +18,6 @@ import android.graphics.Canvas;
 import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
 import com.kvadratin.numerscopus.ornament.IOrnamentManager;
-import com.kvadratin.numerscopus.ornament.OrnamentManager;
 import com.kvadratin.numerscopus.utils.BitmapTextureSource;
 
 public class Fractal {
@@ -148,7 +147,7 @@ public class Fractal {
 				// TODO: text rotation
 
 				part.init(mOrnaments
-						.getSprite(ornamentId, part.getField(), (byte) rand.nextInt(OrnamentManager.FILL_METHODS_COUNT)),
+						.getSprite(ornamentId, part.getField(), (byte) rand.nextInt(mOrnaments.getFillMethodCount())),
 						txt, num + 1, fontId, ornamentId);
 
 				mNumbers[num] = part;
