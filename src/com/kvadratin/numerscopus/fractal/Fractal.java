@@ -6,7 +6,6 @@ import java.util.Stack;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.opengl.font.Font;
 import org.anddev.andengine.opengl.texture.TextureManager;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
@@ -15,10 +14,10 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.util.SparseArray;
 
+import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
-import com.kvadratin.numerscopus.ornament.OrnamentManager;
+import com.kvadratin.numerscopus.ornament.IOrnamentManager;
 import com.kvadratin.numerscopus.utils.BitmapTextureSource;
 
 public class Fractal {
@@ -30,15 +29,15 @@ public class Fractal {
 	private NumberFractalPart[] mNumbers;
 
 	private FractalSplitterManager mSplitters;
-	private OrnamentManager mOrnaments;
-	private SparseArray<Font> mFonts;
+	private IOrnamentManager mOrnaments;
+	private IFontManager mFonts;
 
 	private TextureManager mTextures;
 	private Scene mScene;
 
 	public Fractal(TextureManager pTextures, Scene pScene,
-			FractalSplitterManager pSplitters, OrnamentManager pOrnaments,
-			SparseArray<Font> pFonts, final int pSubpartCount) {
+			FractalSplitterManager pSplitters, IOrnamentManager pOrnaments,
+			IFontManager pFonts, final int pSubpartCount) {
 
 		mSplitters = pSplitters;
 		mOrnaments = pOrnaments;
@@ -148,7 +147,7 @@ public class Fractal {
 				// TODO: text rotation
 
 				part.init(mOrnaments
-						.getSprite(ornamentId, part.getField(), (byte) rand.nextInt(OrnamentManager.FILL_METHODS_COUNT)),
+						.getSprite(ornamentId, part.getField(), (byte) rand.nextInt(mOrnaments.getFillMethodCount())),
 						txt, num + 1, fontId, ornamentId);
 
 				mNumbers[num] = part;

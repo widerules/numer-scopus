@@ -21,16 +21,8 @@ import android.util.Log;
  * @author bargatin
  * @since 2012-01-06
  */
-public class OrnamentManager implements IOrnamentManager {
-
-	// --------------------------------------------------------------------
-	// Константы
-	// --------------------------------------------------------------------
-	/**
-	 * Количество методов заполнения спрайта.
-	 */
-	public static final byte FILL_METHODS_COUNT = 9;
-
+public class AssetOrnamentManager implements IOrnamentManager {
+	
 	// --------------------------------------------------------------------
 	// Поля
 	// --------------------------------------------------------------------
@@ -53,7 +45,7 @@ public class OrnamentManager implements IOrnamentManager {
 	 * @param pTextureSize
 	 *            Размер текстуры орнамента
 	 */
-	public OrnamentManager(final Context pContext, final String pAssetBasePath,
+	public AssetOrnamentManager(final Context pContext, final String pAssetBasePath,
 			final String pFileNamePrefix, final TextureManager pTextureManager,
 			final int pTextureSize) {
 
@@ -125,6 +117,14 @@ public class OrnamentManager implements IOrnamentManager {
 	public BitmapTextureAtlas getTexture(final int pOrnamentId) {
 		return mTextures[pOrnamentId];
 	}
+	
+	/**
+	 * Возвращает количество методов заполнения спрайта.
+	 */
+	@Override
+	public byte getFillMethodCount(){
+		return 9;
+	}
 
 	/**
 	 * Возвращает регион текстуры орнамента
@@ -152,7 +152,7 @@ public class OrnamentManager implements IOrnamentManager {
 	public Sprite getSprite(final int pOrnamentId, RectF pField,
 			byte pFillMethod) {
 
-		pFillMethod = pFillMethod < 0 || pFillMethod >= FILL_METHODS_COUNT ? 0
+		pFillMethod = pFillMethod < 0 || pFillMethod >= this.getFillMethodCount() ? 0
 				: pFillMethod;
 
 		int x = 0;
