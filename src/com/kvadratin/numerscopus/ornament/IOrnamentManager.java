@@ -45,4 +45,9 @@ public interface IOrnamentManager {
 	 * Производит удаление всех текстур
 	 */
 	void clear();
+	
+	/**
+	 * Возвращает количество методов заполнения спрайта.
+	 */
+	byte getFillMethodCount();
 }
