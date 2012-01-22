@@ -1,8 +1,9 @@
 package com.kvadratin.numerscopus.fractal.splitter;
 
-import com.kvadratin.numerscopus.fractal.FractalPart;
-
 import android.graphics.Canvas;
+import android.graphics.Paint;
+
+import com.kvadratin.numerscopus.fractal.FractalPart;
 
 public interface IFractalSplitter {
 	/**
@@ -25,7 +26,7 @@ public interface IFractalSplitter {
 	 * 
 	 * @param pCanvas
 	 */
-	void draw(FractalPart pPart, Canvas pCanvas);
+	void draw(FractalPart pPart, Canvas pCanvas, Paint pPaint);
 
 	/**
 	 * Возвращает уникальный идентификатор алгоритма разбиения

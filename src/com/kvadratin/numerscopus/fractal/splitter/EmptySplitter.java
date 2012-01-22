@@ -1,14 +1,15 @@
 package com.kvadratin.numerscopus.fractal.splitter;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
+
 import com.kvadratin.numerscopus.fractal.FractalPart;
 import com.kvadratin.numerscopus.fractal.NumberFractalPart;
-
-import android.graphics.Canvas;
 
 public class EmptySplitter implements IFractalSplitter{
 
 	@Override
-	public void draw(FractalPart pPart, Canvas pCanvas) {		
+	public void draw(FractalPart pPart, Canvas pCanvas, Paint pPaint) {		
 	}
 
 	@Override

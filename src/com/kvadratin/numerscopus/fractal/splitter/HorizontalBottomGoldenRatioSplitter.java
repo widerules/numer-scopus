@@ -9,15 +9,11 @@ import com.kvadratin.numerscopus.fractal.FractalPart;
 public class HorizontalBottomGoldenRatioSplitter implements IFractalSplitter {
 
 	@Override
-	public void draw(FractalPart pPart, Canvas pCanvas) {
-		Paint paint = new Paint();
-		paint.setARGB(255, 255, 109, 27);
-		paint.setStrokeWidth(3);
-
+	public void draw(FractalPart pPart, Canvas pCanvas, Paint pPaint) {
 		pCanvas.drawLine(pPart.getField().left, pPart.getField().top
 				+ pPart.getHeight() * (1 - this.getMinHeightFactor()), pPart
 				.getField().right, pPart.getField().top + pPart.getHeight()
-				* (1 - this.getMinHeightFactor()), paint);
+				* (1 - this.getMinHeightFactor()), pPaint);
 	}
 
 	@Override
