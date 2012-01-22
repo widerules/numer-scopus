@@ -1,14 +1,11 @@
 package com.kvadratin.numerscopus;
 
-import java.util.Random;
-
 import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
+import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.extension.svg.opengl.texture.atlas.bitmap.SVGBitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.input.touch.TouchEvent;
@@ -17,19 +14,22 @@ import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 import android.graphics.Color;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import com.kvadratin.numerscopus.font.FontManagerFactory;
 import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.Fractal;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
+import com.kvadratin.numerscopus.fractal.theme.FractalThemeFactory;
+import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
 import com.kvadratin.numerscopus.ornament.IOrnamentManager;
 import com.kvadratin.numerscopus.ornament.OrnamentManagerFactory;
 
 public class NumerScopusActivity extends BaseGameActivity {
 
+	private static int FRACTAL_PADDING = 100;
+
 	private DisplayMetrics mMetrics;
-	private Camera mCamera;
+	private SmoothCamera mCamera;
 	private Scene mScene;
 
 	private FractalSplitterManager mSplitterManager;
@@ -37,6 +37,9 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private IFontManager mFontManager;
 
 	private Fractal mFractal;
+
+	private float mBeginTouchPositionX;
+	private float mBeginTouchPositionY;
 
 	@Override
 	public void onLoadComplete() {
@@ -48,7 +51,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 		mMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(mMetrics);
 
-		mCamera = new Camera(0, 0, mMetrics.widthPixels, mMetrics.heightPixels);
+		mCamera = new SmoothCamera(0, 0, mMetrics.widthPixels,
+				mMetrics.heightPixels, 500, 500, 1);
 
 		EngineOptions options = new EngineOptions(true,
 				ScreenOrientation.PORTRAIT, new RatioResolutionPolicy(
@@ -66,8 +70,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 		// TODO: Font size, must be relative to display metrics
 		mFontManager = FontManagerFactory.createAssetFontManager(this, mEngine
 				.getFontManager(), mEngine.getTextureManager(), "fonts",
-				"base_", Color.argb(255, 68, 24, 24), Color.argb(255, 68, 24,
-						24), 120, 1, false);
+				"base_", Color.argb(255, 255, 255, 255), Color.argb(255, 255,
+						255, 255), 120, 1, false);
 
 		mSplitterManager = new FractalSplitterManager(mMetrics);
 		// TODO: Texture size, must be relative to display metrics
@@ -85,25 +89,50 @@ public class NumerScopusActivity extends BaseGameActivity {
 			public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
 				super.onSceneTouchEvent(pSceneTouchEvent);
 
-				// try {
 				if (pSceneTouchEvent.isActionDown()) {
-					Log.d("NumerScopus", "Start split");
-					mFractal.split((new Random()).nextInt(20));
-					Log.d("NumerScopus", "End split");
+					mBeginTouchPositionX = pSceneTouchEvent.getX();
+					mBeginTouchPositionY = pSceneTouchEvent.getY();
 				}
-				// } catch (Exception ex) {
-				// Log.e("NumerScopus", "Error on touch: " + ex.getMessage(),
-				// ex);
-				// }
+
+				if (pSceneTouchEvent.isActionMove()) {
+
+					float x = mCamera.getCenterX();
+					float y = mCamera.getCenterY();
+					float dx = mBeginTouchPositionX - pSceneTouchEvent.getX();
+					float dy = mBeginTouchPositionY - pSceneTouchEvent.getY();
+
+					if (x + dx >= mFractal.getX() + mCamera.getWidth() * 0.5f - FRACTAL_PADDING
+							&& x + dx <= mFractal.getWidth() - mCamera.getWidth() * 0.5f + FRACTAL_PADDING)
+						x += dx;
+
+					if (y + dy >= mFractal.getY() + mCamera.getHeight() * 0.5f - FRACTAL_PADDING
+							&& y + dy <= mFractal.getHeight() - mCamera.getHeight() * 0.5f + FRACTAL_PADDING)
+						y += dy;
+					
+					mCamera.setCenter(x, y);
+				}
+				/*
+				 * try { if (pSceneTouchEvent.isActionDown()) {
+				 * mFractal.split((new Random()).nextInt(20)); } } catch
+				 * (Exception ex) { Log.e("NumerScopus", "Error on touch: " +
+				 * ex.getMessage(), ex); }
+				 */
 
 				return true;
 			}
 		};
 
-		mScene.setBackground(new ColorBackground(1f, 1f, 1f));
+		IFractalTheme theme = // FractalThemeFactory.createClearGreyFractalTheme(mFontManager);
+		FractalThemeFactory.createBaseFractalTheme(mFontManager,
+				mOrnamentManager);
+
+		mScene.setBackground(theme.getBackground());
 
 		mFractal = new Fractal(mEngine.getTextureManager(), mScene,
-				mSplitterManager, mOrnamentManager, mFontManager, 1);
+				mSplitterManager, theme, 100);
+
+		mCamera.setCenter(mFractal.getWidth() * 0.5f,
+				mFractal.getHeight() * 0.5f);
 
 		return mScene;
 	}

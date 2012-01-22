@@ -9,16 +9,12 @@ import com.kvadratin.numerscopus.fractal.FractalPart;
 public class VerticalRightGoldenRatioSplitter implements IFractalSplitter {
 
 	@Override
-	public void draw(FractalPart pPart, Canvas pCanvas) {
-		Paint paint = new Paint();
-		paint.setARGB(255, 255, 109, 27);
-		paint.setStrokeWidth(3);
-
+	public void draw(FractalPart pPart, Canvas pCanvas, Paint pPaint) {
 		pCanvas.drawLine(pPart.getField().left + pPart.getWidth()
 				* (1 - this.getMinWidthFactor()), pPart.getField().top, pPart
 				.getField().left
 				+ pPart.getWidth() * (1 - this.getMinWidthFactor()),
-				pPart.getField().bottom, paint);
+				pPart.getField().bottom, pPaint);
 	}
 
 	@Override
