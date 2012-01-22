@@ -14,12 +14,14 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
+import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
 import com.kvadratin.numerscopus.ornament.IOrnamentManager;
-import com.kvadratin.numerscopus.ornament.OrnamentManager;
 import com.kvadratin.numerscopus.utils.BitmapTextureSource;
+import com.kvadratin.numerscopus.utils.TextureHelper;
 
 public class Fractal {
 
@@ -30,6 +32,7 @@ public class Fractal {
 	private NumberFractalPart[] mNumbers;
 
 	private FractalSplitterManager mSplitters;
+	private IFractalTheme mFractalTheme;
 	private IOrnamentManager mOrnaments;
 	private IFontManager mFonts;
 
@@ -37,12 +40,14 @@ public class Fractal {
 	private Scene mScene;
 
 	public Fractal(TextureManager pTextures, Scene pScene,
-			FractalSplitterManager pSplitters, IOrnamentManager pOrnaments,
-			IFontManager pFonts, final int pSubpartCount) {
+			FractalSplitterManager pSplitters, IFractalTheme pFractalTheme,
+			final int pSubpartCount) {
 
 		mSplitters = pSplitters;
-		mOrnaments = pOrnaments;
-		mFonts = pFonts;
+		mFractalTheme = pFractalTheme;
+
+		mOrnaments = mFractalTheme.getOrnamentManager();
+		mFonts = mFractalTheme.getFontManager();
 
 		mTextures = pTextures;
 		mScene = pScene;
@@ -118,8 +123,8 @@ public class Fractal {
 
 				NumberFractalPart part = (NumberFractalPart) currentChildren[0];
 				int num = rand.nextInt(pSubpartCount);
-				int fontId = rand.nextInt(mFonts.size());
-				int ornamentId = rand.nextInt(mOrnaments.getOrnamentCount());
+				int fontId = rand.nextInt(mFonts.size());				
+				int ornamentId = mOrnaments != null ? rand.nextInt(mOrnaments.getOrnamentCount()) : -1;
 
 				if (mNumbers[num] != null) {
 					for (int i = 0; i < mNumbers.length; i++) {
@@ -132,6 +137,10 @@ public class Fractal {
 
 				Text txt = new Text(0, 0, mFonts.get(fontId), Integer
 						.toString(num + 1));
+				txt.setColor(mFractalTheme.getTextColorRed(), mFractalTheme
+						.getTextColorGreen(), mFractalTheme.getTextColorBlue(),
+						mFractalTheme.getTextColorAlpha());
+
 				txt.setScaleCenter(0, 0);
 				txt.setScale(Math.min(part.getWidth()
 						/ (txt.getWidth() + 10 * txt.getText().length()), part
@@ -147,8 +156,8 @@ public class Fractal {
 								- (txt.getHeightScaled() * 0.5f));
 				// TODO: text rotation
 
-				part.init(mOrnaments
-						.getSprite(ornamentId, part.getField(), (byte) rand.nextInt(OrnamentManager.FILL_METHODS_COUNT)),
+				part.init(mOrnaments != null ? mOrnaments.getSprite(ornamentId, part.getField(),
+						(byte) rand.nextInt(mOrnaments.getFillMethodCount())) : null,
 						txt, num + 1, fontId, ornamentId);
 
 				mNumbers[num] = part;
@@ -216,40 +225,61 @@ public class Fractal {
 				}
 			}
 		} while (needNextSplit);
-		
+
 		// Помещаем числа на сцену
 		for (int i = 0; i < mNumbers.length; i++) {
-			mScene.attachChild(mNumbers[i].getOrnamentSprite());
+			if (mNumbers[i].getOrnamentSprite() != null)
+				mScene.attachChild(mNumbers[i].getOrnamentSprite());
 			mScene.attachChild(mNumbers[i].getNumberText());
 		}
 
-		// Готовим рисунок разбиения и помещаем его на сцену
-		mFractalImage = Bitmap.createBitmap((int) mFractal.getWidth(),
-				(int) mFractal.getHeight(), Bitmap.Config.ARGB_8888);
-		Canvas c = new Canvas(mFractalImage);
-		c.drawARGB(0, 255, 255, 255);
-		mFractal.draw(c);
+		if (mFractalTheme.isBorderVisible()) {
+			// Готовим рисунок разбиения и помещаем его на сцену
+			mFractalImage = Bitmap.createBitmap((int) mFractal.getWidth(),
+					(int) mFractal.getHeight(), Bitmap.Config.ARGB_8888);
+			
+			Canvas c = new Canvas(mFractalImage);
+			c.drawARGB(0, 255, 255, 255);
+			
+			Paint paint = mFractalTheme.getBorderPaint();
+			float delta = paint.getStrokeWidth() * 0.5f;
+			
+			// Рисуем рамку фрактала
+			c.drawLine(mFractal.getX(), mFractal.getY() + delta, mFractal.getWidth(), mFractal.getY() + delta, paint);
+			c.drawLine(mFractal.getWidth() - delta, mFractal.getY(), mFractal.getWidth() - delta, mFractal.getHeight(), paint);
+			c.drawLine(mFractal.getWidth(), mFractal.getHeight() - delta, mFractal.getX(), mFractal.getHeight() - delta, paint);
+			c.drawLine(mFractal.getX() + delta, mFractal.getHeight(), mFractal.getX() + delta, mFractal.getY(), paint);
+			
+			mFractal.draw(c, mFractalTheme.getBorderPaint());
 
-		int textureSize = mFractalImage.getWidth() <= 128
-				&& mFractalImage.getHeight() <= 128 ? 128 : mFractalImage
-				.getWidth() <= 256
-				&& mFractalImage.getHeight() <= 256 ? 256 : mFractalImage
-				.getWidth() <= 512
-				&& mFractalImage.getHeight() <= 512 ? 512 : mFractalImage
-				.getWidth() <= 1024
-				&& mFractalImage.getHeight() <= 1024 ? 1024 : mFractalImage
-				.getWidth() <= 2048
-				&& mFractalImage.getHeight() <= 2048 ? 2048 : 4096;
+			mFractalTexture = new BitmapTextureAtlas(TextureHelper
+					.calcSize(mFractalImage.getWidth()), TextureHelper
+					.calcSize(mFractalImage.getHeight()),
+					TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 
-		mFractalTexture = new BitmapTextureAtlas(textureSize, textureSize,
-				TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+			TextureRegion tr = BitmapTextureAtlasTextureRegionFactory
+					.createFromSource(mFractalTexture, new BitmapTextureSource(
+							mFractalImage), 0, 0);
+			mTextures.loadTexture(mFractalTexture);
 
-		TextureRegion tr = BitmapTextureAtlasTextureRegionFactory
-				.createFromSource(mFractalTexture, new BitmapTextureSource(
-						mFractalImage), 0, 0);
-		mTextures.loadTexture(mFractalTexture);
-
-		mFractalSprite = new Sprite(0, 0, tr);
-		mScene.attachChild(mFractalSprite);
+			mFractalSprite = new Sprite(0, 0, tr);
+			mScene.attachChild(mFractalSprite);
+		}
+	}
+	
+	public float getWidth(){
+		return mFractal.getWidth();
+	}
+	
+	public float getHeight(){
+		return mFractal.getHeight();
+	}
+	
+	public float getX(){
+		return mFractal.getX();
+	}
+	
+	public float getY(){
+		return mFractal.getY();
 	}
 }
