@@ -26,7 +26,7 @@ import com.kvadratin.numerscopus.ornament.OrnamentManagerFactory;
 
 public class NumerScopusActivity extends BaseGameActivity {
 
-	private static int FRACTAL_PADDING = 100;
+	private static int FRACTAL_PADDING = 10;
 
 	private DisplayMetrics mMetrics;
 	private SmoothCamera mCamera;
@@ -101,14 +101,28 @@ public class NumerScopusActivity extends BaseGameActivity {
 					float dx = mBeginTouchPositionX - pSceneTouchEvent.getX();
 					float dy = mBeginTouchPositionY - pSceneTouchEvent.getY();
 
-					if (x + dx >= mFractal.getX() + mCamera.getWidth() * 0.5f - FRACTAL_PADDING
-							&& x + dx <= mFractal.getWidth() - mCamera.getWidth() * 0.5f + FRACTAL_PADDING)
+					float left = mFractal.getX() + mCamera.getWidth() * 0.5f
+							- FRACTAL_PADDING;
+					float right = mFractal.getWidth() - mCamera.getWidth()
+							* 0.5f + FRACTAL_PADDING;
+					
+					float top = mFractal.getY() + mCamera.getHeight() * 0.5f - FRACTAL_PADDING;
+					float bottom = mFractal.getHeight()	- mCamera.getHeight() * 0.5f + FRACTAL_PADDING;
+					
+					if (x + dx < left)
+						x = left;
+					else if (x + dx > right)
+						x = right;
+					else
 						x += dx;
 
-					if (y + dy >= mFractal.getY() + mCamera.getHeight() * 0.5f - FRACTAL_PADDING
-							&& y + dy <= mFractal.getHeight() - mCamera.getHeight() * 0.5f + FRACTAL_PADDING)
+					if (y + dy < top)
+						y = top;
+					else if (y + dy > bottom)
+						y = bottom;
+					else
 						y += dy;
-					
+
 					mCamera.setCenter(x, y);
 				}
 				/*
