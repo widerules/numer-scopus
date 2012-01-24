@@ -3,10 +3,12 @@ package com.kvadratin.numerscopus.fractal;
 import java.util.Random;
 import java.util.Stack;
 
+import org.anddev.andengine.engine.Engine;
+import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.Text;
-import org.anddev.andengine.opengl.texture.TextureManager;
+import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -15,6 +17,7 @@ import org.anddev.andengine.opengl.texture.region.TextureRegion;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.DisplayMetrics;
 
 import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
@@ -24,34 +27,84 @@ import com.kvadratin.numerscopus.utils.BitmapTextureSource;
 import com.kvadratin.numerscopus.utils.TextureHelper;
 
 public class Fractal {
-
+	
 	private FractalPart mFractal;
 	private Bitmap mFractalImage;
 	private BitmapTextureAtlas mFractalTexture;
 	private Sprite mFractalSprite;
 	private NumberFractalPart[] mNumbers;
+	private float mFractalPadding;
 
 	private FractalSplitterManager mSplitters;
 	private IFractalTheme mFractalTheme;
-	private IOrnamentManager mOrnaments;
-	private IFontManager mFonts;
+	
+	protected DisplayMetrics mMetrics;
+	protected Engine mEngine;	
+	protected Scene mScene;
+	
+	private float mBeginTouchPositionX;
+	private float mBeginTouchPositionY;
 
-	private TextureManager mTextures;
-	private Scene mScene;
-
-	public Fractal(TextureManager pTextures, Scene pScene,
-			FractalSplitterManager pSplitters, IFractalTheme pFractalTheme,
+	public Fractal(DisplayMetrics pMetrics, Engine pEngine, IFractalTheme pFractalTheme,
 			final int pSubpartCount) {
-
-		mSplitters = pSplitters;
+		
+		mMetrics = pMetrics;
+		mSplitters = new FractalSplitterManager(mMetrics);
 		mFractalTheme = pFractalTheme;
+		mEngine = pEngine;
+		mFractalPadding = 10;
+		
+		// Создаем сцену для фрактала
+		mScene = new Scene() {
 
-		mOrnaments = mFractalTheme.getOrnamentManager();
-		mFonts = mFractalTheme.getFontManager();
+			@Override
+			public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
+				super.onSceneTouchEvent(pSceneTouchEvent);
 
-		mTextures = pTextures;
-		mScene = pScene;
+				if (pSceneTouchEvent.isActionDown()) {
+					mBeginTouchPositionX = pSceneTouchEvent.getX();
+					mBeginTouchPositionY = pSceneTouchEvent.getY();
+				}
 
+				if (pSceneTouchEvent.isActionMove()) {
+					
+					Camera camera = mEngine.getCamera();
+					float x = camera.getCenterX();
+					float y = camera.getCenterY();
+					float dx = mBeginTouchPositionX - pSceneTouchEvent.getX();
+					float dy = mBeginTouchPositionY - pSceneTouchEvent.getY();
+
+					float left = mFractal.getX() + camera.getWidth() * 0.5f
+							- mFractalPadding;
+					float right = mFractal.getWidth() - camera.getWidth()
+							* 0.5f + mFractalPadding;
+					
+					float top = mFractal.getY() + camera.getHeight() * 0.5f - mFractalPadding;
+					float bottom = mFractal.getHeight()	- camera.getHeight() * 0.5f + mFractalPadding;
+					
+					if (x + dx < left)
+						x = left;
+					else if (x + dx > right)
+						x = right;
+					else
+						x += dx;
+
+					if (y + dy < top)
+						y = top;
+					else if (y + dy > bottom)
+						y = bottom;
+					else
+						y += dy;
+
+					camera.setCenter(x, y);
+				}
+				
+				return true;
+			}
+		};
+		
+		mScene.setBackground(mFractalTheme.getBackground());
+		
 		this.split(pSubpartCount);
 	}
 
@@ -76,7 +129,7 @@ public class Fractal {
 		if (mFractalSprite != null)
 			mScene.detachChild(mFractalSprite);
 		if (mFractalTexture != null)
-			mTextures.unloadTexture(mFractalTexture);
+			mEngine.getTextureManager().unloadTexture(mFractalTexture);
 
 		if (mFractal != null)
 			mFractal.clear();
@@ -101,6 +154,10 @@ public class Fractal {
 
 		this.clear();
 		pSubpartCount = pSubpartCount > 0 ? pSubpartCount : 1;
+		
+		IOrnamentManager ornaments = mFractalTheme.getOrnamentManager();
+		IFontManager fonts = mFractalTheme.getFontManager();
+		
 		mNumbers = new NumberFractalPart[pSubpartCount];
 		mFractal = mSplitters.getFractalPart(pSubpartCount);
 
@@ -123,8 +180,8 @@ public class Fractal {
 
 				NumberFractalPart part = (NumberFractalPart) currentChildren[0];
 				int num = rand.nextInt(pSubpartCount);
-				int fontId = rand.nextInt(mFonts.size());				
-				int ornamentId = mOrnaments != null ? rand.nextInt(mOrnaments.getOrnamentCount()) : -1;
+				int fontId = rand.nextInt(fonts.size());				
+				int ornamentId = ornaments != null ? rand.nextInt(ornaments.getOrnamentCount()) : -1;
 
 				if (mNumbers[num] != null) {
 					for (int i = 0; i < mNumbers.length; i++) {
@@ -134,8 +191,9 @@ public class Fractal {
 						}
 					}
 				}
-
-				Text txt = new Text(0, 0, mFonts.get(fontId), Integer
+				
+				// Создаем текст числа
+				Text txt = new Text(0, 0, fonts.get(fontId), Integer
 						.toString(num + 1));
 				txt.setColor(mFractalTheme.getTextColorRed(), mFractalTheme
 						.getTextColorGreen(), mFractalTheme.getTextColorBlue(),
@@ -156,8 +214,8 @@ public class Fractal {
 								- (txt.getHeightScaled() * 0.5f));
 				// TODO: text rotation
 
-				part.init(mOrnaments != null ? mOrnaments.getSprite(ornamentId, part.getField(),
-						(byte) rand.nextInt(mOrnaments.getFillMethodCount())) : null,
+				part.init(ornaments != null ? ornaments.getSprite(ornamentId, part.getField(),
+						(byte) rand.nextInt(ornaments.getFillMethodCount())) : null,
 						txt, num + 1, fontId, ornamentId);
 
 				mNumbers[num] = part;
@@ -260,7 +318,7 @@ public class Fractal {
 			TextureRegion tr = BitmapTextureAtlasTextureRegionFactory
 					.createFromSource(mFractalTexture, new BitmapTextureSource(
 							mFractalImage), 0, 0);
-			mTextures.loadTexture(mFractalTexture);
+			mEngine.getTextureManager().loadTexture(mFractalTexture);
 
 			mFractalSprite = new Sprite(0, 0, tr);
 			mScene.attachChild(mFractalSprite);
@@ -282,4 +340,12 @@ public class Fractal {
 	public float getY(){
 		return mFractal.getY();
 	}
+	
+	public float getPadding(){
+		return mFractalPadding;
+	}
+	
+	public Scene getScene(){
+		return mScene;
+	}	
 }
