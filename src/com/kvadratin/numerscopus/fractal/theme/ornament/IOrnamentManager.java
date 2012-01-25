@@ -1,6 +1,6 @@
-package com.kvadratin.numerscopus.ornament;
+package com.kvadratin.numerscopus.fractal.theme.ornament;
 
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.region.TextureRegion;
 
@@ -29,7 +29,7 @@ public interface IOrnamentManager {
 	TextureRegion getTextureRegion(final int pOrnamentId);
 	
 	/**
-	 * Возвращает спрайт орнамента, подогнанный по размеру под pField
+	 * Возвращает орнамент, подогнанный по размеру под pField
 	 * 
 	 * @param pOrnamentId
 	 *            Идентификатор орнамента
@@ -39,7 +39,7 @@ public interface IOrnamentManager {
 	 *            Метод заполнения спрайта текстурой. pFillMethod <
 	 *            FILL_METHODS_COUNT
 	 */
-	Sprite getSprite(final int pOrnamentId, RectF pField, byte pFillMethod);
+	IEntity getEntity(final int pOrnamentId, RectF pField, byte pFillMethod);
 	
 	/**
 	 * Производит удаление всех текстур

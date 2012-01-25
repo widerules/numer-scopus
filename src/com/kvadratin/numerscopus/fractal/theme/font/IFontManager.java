@@ -1,4 +1,4 @@
-package com.kvadratin.numerscopus.font;
+package com.kvadratin.numerscopus.fractal.theme.font;
 
 import org.anddev.andengine.opengl.font.Font;
 

@@ -1,6 +1,6 @@
 package com.kvadratin.numerscopus.fractal;
 
-import org.anddev.andengine.entity.sprite.Sprite;
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.text.Text;
 
 import android.graphics.RectF;
@@ -11,7 +11,7 @@ public class NumberFractalPart extends FractalPart {
 	private int mFontId;
 	private int mNumber;
 
-	private Sprite mOrnamentSprite;
+	private IEntity mOrnamentEntity;
 	private Text mNumberText;
 
 	public NumberFractalPart(RectF pField) {
@@ -22,9 +22,9 @@ public class NumberFractalPart extends FractalPart {
 		mNumber = -1;
 	}
 
-	public void init(final Sprite pOrnamentSprite, final Text pNumberText,
+	public void init(final IEntity pOrnamentEntity, final Text pNumberText,
 			final int pNumber, final int pFontId, final int pOrnamentId) {
-		mOrnamentSprite = pOrnamentSprite;
+		mOrnamentEntity = pOrnamentEntity;
 		mNumberText = pNumberText;
 		mNumber = pNumber;
 		mFontId = pFontId;
@@ -37,15 +37,15 @@ public class NumberFractalPart extends FractalPart {
 	
 	@Override
 	public void clear(){
-		mOrnamentSprite = null;
+		mOrnamentEntity = null;
 		mNumberText = null;
 		mOrnamentId = -1;
 		mFontId = -1;
 		mNumber = -1;		
 	}
 
-	public Sprite getOrnamentSprite() {
-		return mOrnamentSprite;
+	public IEntity getOrnamentEntity() {
+		return mOrnamentEntity;
 	}
 
 	public Text getNumberText() {

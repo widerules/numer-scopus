@@ -1,8 +1,9 @@
-package com.kvadratin.numerscopus.ornament;
+package com.kvadratin.numerscopus.fractal.theme.ornament;
 
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.extension.svg.opengl.texture.atlas.bitmap.SVGBitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.texture.TextureManager;
@@ -149,7 +150,7 @@ public class AssetOrnamentManager implements IOrnamentManager {
 	 *            FILL_METHODS_COUNT
 	 */
 	@Override
-	public Sprite getSprite(final int pOrnamentId, RectF pField,
+	public IEntity getEntity(final int pOrnamentId, RectF pField,
 			byte pFillMethod) {
 
 		pFillMethod = pFillMethod < 0 || pFillMethod >= this.getFillMethodCount() ? 0
