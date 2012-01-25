@@ -196,6 +196,8 @@ public class Fractal {
 				// Создаем текст числа
 				Text txt = new Text(0, 0, fonts.get(fontId), Integer
 						.toString(num + 1));
+				
+				txt.setIgnoreUpdate(true);
 				txt.setColor(mFractalTheme.getTextColorRed(), mFractalTheme
 						.getTextColorGreen(), mFractalTheme.getTextColorBlue(),
 						mFractalTheme.getTextColorAlpha());
@@ -214,10 +216,14 @@ public class Fractal {
 						part.getY() + ((part.getHeight() * 0.5f))
 								- (txt.getHeightScaled() * 0.5f));
 				// TODO: text rotation
-
-				part.init(ornaments != null ? ornaments.getEntity(ornamentId, part.getField(),
-						(byte) rand.nextInt(ornaments.getFillMethodCount())) : null,
-						txt, num + 1, fontId, ornamentId);
+				
+				IEntity entity = ornaments != null ? ornaments.getEntity(ornamentId, part.getField(),
+						(byte) rand.nextInt(ornaments.getFillMethodCount())) : null;
+				
+				if(entity != null)
+					entity.setIgnoreUpdate(true);
+				
+				part.init(entity, txt, num + 1, fontId, ornamentId);
 
 				mNumbers[num] = part;
 				needNextSplit = false;

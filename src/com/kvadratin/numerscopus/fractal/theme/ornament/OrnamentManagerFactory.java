@@ -25,4 +25,8 @@ public class OrnamentManagerFactory {
 		return new AssetOrnamentManager(pContext, pAssetBasePath,
 				pFileNamePrefix, pTextureManager, pTextureSize);
 	}
+	
+	public static ColorRectOrnamentManager createColorRectOrnamentManager(){
+		return new ColorRectOrnamentManager();
+	}
 }
