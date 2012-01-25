@@ -6,8 +6,8 @@ import org.anddev.andengine.entity.scene.background.IBackground;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import com.kvadratin.numerscopus.font.IFontManager;
-import com.kvadratin.numerscopus.ornament.IOrnamentManager;
+import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
+import com.kvadratin.numerscopus.fractal.theme.ornament.IOrnamentManager;
 import com.kvadratin.numerscopus.utils.ColorHelper;
 
 public class BaseFractalTheme implements IFractalTheme {

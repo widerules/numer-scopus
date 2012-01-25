@@ -1,4 +1,4 @@
-package com.kvadratin.numerscopus.ornament;
+package com.kvadratin.numerscopus.fractal.theme.ornament;
 
 import org.anddev.andengine.opengl.texture.TextureManager;
 

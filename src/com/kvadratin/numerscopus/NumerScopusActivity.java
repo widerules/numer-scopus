@@ -14,13 +14,13 @@ import org.anddev.andengine.ui.activity.BaseGameActivity;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
 
-import com.kvadratin.numerscopus.font.FontManagerFactory;
-import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.Fractal;
 import com.kvadratin.numerscopus.fractal.theme.FractalThemeFactory;
 import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
-import com.kvadratin.numerscopus.ornament.IOrnamentManager;
-import com.kvadratin.numerscopus.ornament.OrnamentManagerFactory;
+import com.kvadratin.numerscopus.fractal.theme.font.FontManagerFactory;
+import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
+import com.kvadratin.numerscopus.fractal.theme.ornament.IOrnamentManager;
+import com.kvadratin.numerscopus.fractal.theme.ornament.OrnamentManagerFactory;
 
 public class NumerScopusActivity extends BaseGameActivity {
 

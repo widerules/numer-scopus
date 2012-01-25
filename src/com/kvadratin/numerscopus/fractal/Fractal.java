@@ -5,6 +5,7 @@ import java.util.Stack;
 
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
+import org.anddev.andengine.entity.IEntity;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.Text;
@@ -19,10 +20,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.DisplayMetrics;
 
-import com.kvadratin.numerscopus.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
 import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
-import com.kvadratin.numerscopus.ornament.IOrnamentManager;
+import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
+import com.kvadratin.numerscopus.fractal.theme.ornament.IOrnamentManager;
 import com.kvadratin.numerscopus.utils.BitmapTextureSource;
 import com.kvadratin.numerscopus.utils.TextureHelper;
 
@@ -116,7 +117,7 @@ public class Fractal {
 		if (mNumbers != null)
 			for (int i = 0; i < mNumbers.length; i++) {
 				if (mNumbers[i] != null) {
-					Sprite ornament = mNumbers[i].getOrnamentSprite();
+					IEntity ornament = mNumbers[i].getOrnamentEntity();
 					if (ornament != null)
 						mScene.detachChild(ornament);
 
@@ -214,7 +215,7 @@ public class Fractal {
 								- (txt.getHeightScaled() * 0.5f));
 				// TODO: text rotation
 
-				part.init(ornaments != null ? ornaments.getSprite(ornamentId, part.getField(),
+				part.init(ornaments != null ? ornaments.getEntity(ornamentId, part.getField(),
 						(byte) rand.nextInt(ornaments.getFillMethodCount())) : null,
 						txt, num + 1, fontId, ornamentId);
 
@@ -286,8 +287,8 @@ public class Fractal {
 
 		// Помещаем числа на сцену
 		for (int i = 0; i < mNumbers.length; i++) {
-			if (mNumbers[i].getOrnamentSprite() != null)
-				mScene.attachChild(mNumbers[i].getOrnamentSprite());
+			if (mNumbers[i].getOrnamentEntity() != null)
+				mScene.attachChild(mNumbers[i].getOrnamentEntity());
 			mScene.attachChild(mNumbers[i].getNumberText());
 		}
 
