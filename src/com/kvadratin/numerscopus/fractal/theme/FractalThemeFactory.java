@@ -11,4 +11,8 @@ public class FractalThemeFactory {
 	public static ClearGreyFractalTheme createClearGreyFractalTheme(IFontManager pFontManager){
 		return new ClearGreyFractalTheme(pFontManager);
 	}
+	
+	public static ColorRectFractalTheme createColorRectFractalTheme(IFontManager pFontManager, IOrnamentManager pOrnamentManager){
+		return new ColorRectFractalTheme(pFontManager, pOrnamentManager);
+	}
 }

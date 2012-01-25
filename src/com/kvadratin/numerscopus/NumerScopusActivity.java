@@ -72,9 +72,10 @@ public class NumerScopusActivity extends BaseGameActivity {
 	public Scene onLoadScene() {
 		mEngine.registerUpdateHandler(new FPSLogger());
 
-		IFractalTheme theme = // FractalThemeFactory.createClearGreyFractalTheme(mFontManager);
-		FractalThemeFactory.createBaseFractalTheme(mFontManager,
-				mOrnamentManager);
+		IFractalTheme theme = 
+			//FractalThemeFactory.createClearGreyFractalTheme(mFontManager);
+			//FractalThemeFactory.createBaseFractalTheme(mFontManager, mOrnamentManager);
+			FractalThemeFactory.createColorRectFractalTheme(mFontManager, OrnamentManagerFactory.createColorRectOrnamentManager());
 
 		mFractal = new Fractal(mMetrics, mEngine, theme, 100);
 
