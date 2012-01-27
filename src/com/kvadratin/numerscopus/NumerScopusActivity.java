@@ -5,7 +5,10 @@ import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.entity.modifier.RotationModifier;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.extension.svg.opengl.texture.atlas.bitmap.SVGBitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.font.FontFactory;
@@ -15,6 +18,8 @@ import android.graphics.Color;
 import android.util.DisplayMetrics;
 
 import com.kvadratin.numerscopus.fractal.Fractal;
+import com.kvadratin.numerscopus.fractal.event.FractalTouchEvent;
+import com.kvadratin.numerscopus.fractal.event.IFractalClickListener;
 import com.kvadratin.numerscopus.fractal.theme.FractalThemeFactory;
 import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
 import com.kvadratin.numerscopus.fractal.theme.font.FontManagerFactory;
@@ -30,6 +35,7 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private IOrnamentManager mOrnamentManager;
 	private IFontManager mFontManager;
 	private Fractal mFractal;
+	private IFractalTheme mTheme;
 
 	@Override
 	public void onLoadComplete() {
@@ -72,12 +78,25 @@ public class NumerScopusActivity extends BaseGameActivity {
 	public Scene onLoadScene() {
 		mEngine.registerUpdateHandler(new FPSLogger());
 
-		IFractalTheme theme = 
+		mTheme = 
 			//FractalThemeFactory.createClearGreyFractalTheme(mFontManager);
 			//FractalThemeFactory.createBaseFractalTheme(mFontManager, mOrnamentManager);
 			FractalThemeFactory.createColorRectFractalTheme(mFontManager, OrnamentManagerFactory.createColorRectOrnamentManager());
 
-		mFractal = new Fractal(mMetrics, mEngine, theme, 100);
+		mFractal = new Fractal(mMetrics, mEngine, mTheme, 100);
+		mFractal.addClickListener(new IFractalClickListener() {
+			
+			@Override
+			public void onClick(FractalTouchEvent e) {
+				IEntity en = e.getTouchedPart().getOrnamentEntity();
+				en.setIgnoreUpdate(false);
+				en.registerEntityModifier(new RotationModifier(2, 0, 360));
+				
+				Text txt = e.getTouchedPart().getNumberText();
+				txt.setIgnoreUpdate(false);
+				txt.setColor(mTheme.getDisabledTextColorRed(), mTheme.getDisabledTextColorGreen(), mTheme.getDisabledTextColorBlue());
+			}
+		});
 
 		mEngine.getCamera().setCenter(mFractal.getWidth() * 0.5f,
 				mFractal.getHeight() * 0.5f);
