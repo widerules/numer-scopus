@@ -24,7 +24,6 @@ import android.util.DisplayMetrics;
 
 import com.kvadratin.numerscopus.fractal.event.FractalTouchEvent;
 import com.kvadratin.numerscopus.fractal.event.IFractalClickListener;
-import com.kvadratin.numerscopus.fractal.event.IFractalDoubleClickListener;
 import com.kvadratin.numerscopus.fractal.splitter.FractalSplitterManager;
 import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
 import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
@@ -33,7 +32,8 @@ import com.kvadratin.numerscopus.utils.BitmapTextureSource;
 import com.kvadratin.numerscopus.utils.TextureHelper;
 
 public class Fractal {
-	
+
+	private Fractal mSelf;
 	protected FractalPart mFractal;
 	protected Bitmap mFractalImage;
 	protected BitmapTextureAtlas mFractalTexture;
@@ -43,28 +43,29 @@ public class Fractal {
 
 	protected FractalSplitterManager mSplitters;
 	protected IFractalTheme mFractalTheme;
-	
-	protected DisplayMetrics mMetrics;
-	protected Engine mEngine;	
-	protected Scene mScene;
-	
-	private float mBeginTouchPositionX;
-	private float mBeginTouchPositionY;
-	
-	private ArrayList<IFractalClickListener> mClickListeners = new ArrayList<IFractalClickListener>();
-	private ArrayList<IFractalDoubleClickListener> mDblClickListeners = new ArrayList<IFractalDoubleClickListener>();
 
-	public Fractal(DisplayMetrics pMetrics, Engine pEngine, IFractalTheme pFractalTheme,
-			final int pSubpartCount) {
-		
+	protected DisplayMetrics mMetrics;
+	protected Engine mEngine;
+	protected Scene mScene;
+
+	private ArrayList<IFractalClickListener> mClickListeners = new ArrayList<IFractalClickListener>();
+
+	public Fractal(DisplayMetrics pMetrics, Engine pEngine,
+			IFractalTheme pFractalTheme, final int pSubpartCount) {
+
+		mSelf = this;
 		mMetrics = pMetrics;
 		mSplitters = new FractalSplitterManager(mMetrics);
 		mFractalTheme = pFractalTheme;
 		mEngine = pEngine;
 		mFractalPadding = 10;
-		
+
 		// Создаем сцену для фрактала
 		mScene = new Scene() {
+
+			private float mBeginTouchPositionX;
+			private float mBeginTouchPositionY;
+			private boolean mIsMoved;
 
 			@Override
 			public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
@@ -73,17 +74,20 @@ public class Fractal {
 				if (pSceneTouchEvent.isActionDown()) {
 					mBeginTouchPositionX = pSceneTouchEvent.getX();
 					mBeginTouchPositionY = pSceneTouchEvent.getY();
+					mIsMoved = false;
 				}
-				
-				if (pSceneTouchEvent.isActionUp()){
-					if (mBeginTouchPositionX == pSceneTouchEvent.getX()
-							&& mBeginTouchPositionY == pSceneTouchEvent.getY()){
-						fireClick(new FractalTouchEvent((NumberFractalPart)mFractal.getPart(mBeginTouchPositionX, mBeginTouchPositionY)));
+
+				if (pSceneTouchEvent.isActionUp()) {
+					if (!mIsMoved) {
+						fireClick(new FractalTouchEvent(mSelf,
+								(NumberFractalPart) mFractal.getPart(
+										mBeginTouchPositionX,
+										mBeginTouchPositionY), false));
 					}
 				}
 
 				if (pSceneTouchEvent.isActionMove()) {
-					
+
 					Camera camera = mEngine.getCamera();
 					float x = camera.getCenterX();
 					float y = camera.getCenterY();
@@ -94,10 +98,12 @@ public class Fractal {
 							- mFractalPadding;
 					float right = mFractal.getWidth() - camera.getWidth()
 							* 0.5f + mFractalPadding;
-					
-					float top = mFractal.getY() + camera.getHeight() * 0.5f - mFractalPadding;
-					float bottom = mFractal.getHeight()	- camera.getHeight() * 0.5f + mFractalPadding;
-					
+
+					float top = mFractal.getY() + camera.getHeight() * 0.5f
+							- mFractalPadding;
+					float bottom = mFractal.getHeight() - camera.getHeight()
+							* 0.5f + mFractalPadding;
+
 					if (x + dx < left)
 						x = left;
 					else if (x + dx > right)
@@ -112,15 +118,18 @@ public class Fractal {
 					else
 						y += dy;
 
+					if (Math.abs(dx) > 10 || Math.abs(dy) > 10)
+						mIsMoved = true;
+
 					camera.setCenter(x, y);
 				}
-				
+
 				return true;
 			}
 		};
-		
+
 		mScene.setBackground(mFractalTheme.getBackground());
-		
+
 		this.split(pSubpartCount);
 	}
 
@@ -161,6 +170,19 @@ public class Fractal {
 	}
 
 	/**
+	 * Производит разбиение области на подобласти и устанавливает новую тему
+	 * 
+	 * @param pTheme
+	 *            Тема разбиения
+	 * @param pSubpartCount
+	 *            Требуемое количество подобластей
+	 */
+	public void split(IFractalTheme pTheme, int pSubpartCount) {
+		mFractalTheme = pTheme;
+		this.split(pSubpartCount);
+	}
+
+	/**
 	 * Производит разбиение области на подобласти. Итерационный алгоритм.
 	 * 
 	 * @param pSubpartCount
@@ -170,10 +192,10 @@ public class Fractal {
 
 		this.clear();
 		pSubpartCount = pSubpartCount > 0 ? pSubpartCount : 1;
-		
+
 		IOrnamentManager ornaments = mFractalTheme.getOrnamentManager();
 		IFontManager fonts = mFractalTheme.getFontManager();
-		
+
 		mNumbers = new NumberFractalPart[pSubpartCount];
 		mFractal = mSplitters.getFractalPart(pSubpartCount);
 
@@ -196,8 +218,9 @@ public class Fractal {
 
 				NumberFractalPart part = (NumberFractalPart) currentChildren[0];
 				int num = rand.nextInt(pSubpartCount);
-				int fontId = rand.nextInt(fonts.size());				
-				int ornamentId = ornaments != null ? rand.nextInt(ornaments.getOrnamentCount()) : -1;
+				int fontId = rand.nextInt(fonts.size());
+				int ornamentId = ornaments != null ? rand.nextInt(ornaments
+						.getOrnamentCount()) : -1;
 
 				if (mNumbers[num] != null) {
 					for (int i = 0; i < mNumbers.length; i++) {
@@ -207,11 +230,11 @@ public class Fractal {
 						}
 					}
 				}
-				
+
 				// Создаем текст числа
 				Text txt = new Text(0, 0, fonts.get(fontId), Integer
 						.toString(num + 1));
-				
+
 				txt.setIgnoreUpdate(true);
 				txt.setColor(mFractalTheme.getTextColorRed(), mFractalTheme
 						.getTextColorGreen(), mFractalTheme.getTextColorBlue(),
@@ -231,13 +254,15 @@ public class Fractal {
 						part.getY() + ((part.getHeight() * 0.5f))
 								- (txt.getHeightScaled() * 0.5f));
 				// TODO: text rotation
-				
-				IEntity entity = ornaments != null ? ornaments.getEntity(ornamentId, part.getField(),
-						(byte) rand.nextInt(ornaments.getFillMethodCount())) : null;
-				
-				if(entity != null)
+
+				IEntity entity = ornaments != null ? ornaments.getEntity(
+						ornamentId, part.getField(), (byte) rand
+								.nextInt(ornaments.getFillMethodCount()))
+						: null;
+
+				if (entity != null)
 					entity.setIgnoreUpdate(true);
-				
+
 				part.init(entity, txt, num + 1, fontId, ornamentId);
 
 				mNumbers[num] = part;
@@ -317,19 +342,25 @@ public class Fractal {
 			// Готовим рисунок разбиения и помещаем его на сцену
 			mFractalImage = Bitmap.createBitmap((int) mFractal.getWidth(),
 					(int) mFractal.getHeight(), Bitmap.Config.ARGB_8888);
-			
+
 			Canvas c = new Canvas(mFractalImage);
 			c.drawARGB(0, 255, 255, 255);
-			
+
 			Paint paint = mFractalTheme.getBorderPaint();
 			float delta = paint.getStrokeWidth() * 0.5f;
-			
+
 			// Рисуем рамку фрактала
-			c.drawLine(mFractal.getX(), mFractal.getY() + delta, mFractal.getWidth(), mFractal.getY() + delta, paint);
-			c.drawLine(mFractal.getWidth() - delta, mFractal.getY(), mFractal.getWidth() - delta, mFractal.getHeight(), paint);
-			c.drawLine(mFractal.getWidth(), mFractal.getHeight() - delta, mFractal.getX(), mFractal.getHeight() - delta, paint);
-			c.drawLine(mFractal.getX() + delta, mFractal.getHeight(), mFractal.getX() + delta, mFractal.getY(), paint);
-			
+			c.drawLine(mFractal.getX(), mFractal.getY() + delta, mFractal
+					.getWidth(), mFractal.getY() + delta, paint);
+			c.drawLine(mFractal.getWidth() - delta, mFractal.getY(), mFractal
+					.getWidth()
+					- delta, mFractal.getHeight(), paint);
+			c.drawLine(mFractal.getWidth(), mFractal.getHeight() - delta,
+					mFractal.getX(), mFractal.getHeight() - delta, paint);
+			c.drawLine(mFractal.getX() + delta, mFractal.getHeight(), mFractal
+					.getX()
+					+ delta, mFractal.getY(), paint);
+
 			mFractal.draw(c, mFractalTheme.getBorderPaint());
 
 			mFractalTexture = new BitmapTextureAtlas(TextureHelper
@@ -346,72 +377,64 @@ public class Fractal {
 			mScene.attachChild(mFractalSprite);
 		}
 	}
-	
-	public float getWidth(){
+
+	public float getWidth() {
 		return mFractal.getWidth();
 	}
-	
-	public float getHeight(){
+
+	public float getHeight() {
 		return mFractal.getHeight();
 	}
-	
-	public float getX(){
+
+	public float getX() {
 		return mFractal.getX();
 	}
-	
-	public float getY(){
+
+	public float getY() {
 		return mFractal.getY();
 	}
-	
-	public float getPadding(){
+
+	public float getPadding() {
 		return mFractalPadding;
 	}
-	
-	public Scene getScene(){
+
+	public Scene getScene() {
 		return mScene;
 	}
-	
-	//--------------------------------------------------------------
+
+	public IFractalTheme getTheme() {
+		return mFractalTheme;
+	}
+
+	public void hide() {
+		mScene.setVisible(false);
+		mScene.setIgnoreUpdate(true);
+	}
+
+	public void show() {
+		mScene.setVisible(true);
+		mScene.setIgnoreUpdate(false);
+	}
+
+	// --------------------------------------------------------------
 	// Методы для работы с событием Click
-	//--------------------------------------------------------------
-	public void addClickListener(IFractalClickListener pListener){
+	// --------------------------------------------------------------
+	public void addClickListener(IFractalClickListener pListener) {
 		mClickListeners.add(pListener);
 	}
-	
-	public void removeClickListener(IFractalClickListener pListener){
+
+	public void removeClickListener(IFractalClickListener pListener) {
 		mClickListeners.remove(pListener);
 	}
-	
-	public void clearClickListeners(){
+
+	public void clearClickListeners() {
 		mClickListeners.clear();
 	}
-	
-	protected void fireClick(FractalTouchEvent e){
+
+	protected void fireClick(FractalTouchEvent e) {
 		Iterator<IFractalClickListener> i = mClickListeners.iterator();
-		while(i.hasNext()){
+		while (i.hasNext()) {
 			i.next().onClick(e);
-		}
-	}
-	
-	//--------------------------------------------------------------
-	// Методы для работы с событием DoubleClick
-	//--------------------------------------------------------------
-	public void addDblClickListener(IFractalDoubleClickListener pListener){
-		mDblClickListeners.add(pListener);
-	}
-	
-	public void removeDblClickListener(IFractalDoubleClickListener pListener){
-		mDblClickListeners.remove(pListener);
-	}
-	
-	public void clearDblClickListeners(){
-		mDblClickListeners.clear();
-	}
-	
-	protected void fireDblClick(FractalTouchEvent e){
-		Iterator<IFractalDoubleClickListener> i = mDblClickListeners.iterator();
-		while(i.hasNext()){
-			i.next().onDoubleClick(e);
 		}
 	}
 }
