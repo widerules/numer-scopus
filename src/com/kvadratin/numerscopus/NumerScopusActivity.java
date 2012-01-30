@@ -1,5 +1,7 @@
 package com.kvadratin.numerscopus;
 
+import java.util.Random;
+
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
@@ -16,6 +18,8 @@ import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 import android.graphics.Color;
 import android.util.DisplayMetrics;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.kvadratin.numerscopus.fractal.Fractal;
 import com.kvadratin.numerscopus.fractal.event.FractalTouchEvent;
@@ -35,11 +39,11 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private IOrnamentManager mOrnamentManager;
 	private IFontManager mFontManager;
 	private Fractal mFractal;
-	private IFractalTheme mTheme;
+	private IFractalTheme[] mThemes;
 
 	@Override
 	public void onLoadComplete() {
-		
+
 	}
 
 	@Override
@@ -78,23 +82,37 @@ public class NumerScopusActivity extends BaseGameActivity {
 	public Scene onLoadScene() {
 		mEngine.registerUpdateHandler(new FPSLogger());
 
-		mTheme = 
-			//FractalThemeFactory.createClearGreyFractalTheme(mFontManager);
-			//FractalThemeFactory.createBaseFractalTheme(mFontManager, mOrnamentManager);
-			FractalThemeFactory.createColorRectFractalTheme(mFontManager, OrnamentManagerFactory.createColorRectOrnamentManager());
+		mThemes = new IFractalTheme[3];
+		mThemes[0] = FractalThemeFactory
+				.createClearGreyFractalTheme(mFontManager);
+		mThemes[1] = FractalThemeFactory.createBaseFractalTheme(mFontManager,
+				mOrnamentManager);
+		mThemes[2] = FractalThemeFactory.createColorRectFractalTheme(
+				mFontManager, OrnamentManagerFactory
+						.createColorRectOrnamentManager());
 
-		mFractal = new Fractal(mMetrics, mEngine, mTheme, 100);
+		mFractal = new Fractal(mMetrics, mEngine, mThemes[2], 100);
 		mFractal.addClickListener(new IFractalClickListener() {
-			
+
 			@Override
 			public void onClick(FractalTouchEvent e) {
-				IEntity en = e.getTouchedPart().getOrnamentEntity();
-				en.setIgnoreUpdate(false);
-				en.registerEntityModifier(new RotationModifier(2, 0, 360));
-				
-				Text txt = e.getTouchedPart().getNumberText();
-				txt.setIgnoreUpdate(false);
-				txt.setColor(mTheme.getDisabledTextColorRed(), mTheme.getDisabledTextColorGreen(), mTheme.getDisabledTextColorBlue());
+
+				if (e.getTouchedPart() != null) {
+					IEntity en = e.getTouchedPart().getOrnamentEntity();
+
+					if (en != null) {
+						en.setIgnoreUpdate(false);
+						en.registerEntityModifier(new RotationModifier(2, 0,
+								360));
+					}
+
+					Text txt = e.getTouchedPart().getNumberText();
+					txt.setIgnoreUpdate(false);
+					txt.setColor(e.getSource().getTheme()
+							.getDisabledTextColorRed(), e.getSource()
+							.getTheme().getDisabledTextColorGreen(), e
+							.getSource().getTheme().getDisabledTextColorBlue());
+				}
 			}
 		});
 
@@ -104,4 +122,26 @@ public class NumerScopusActivity extends BaseGameActivity {
 		return mFractal.getScene();
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(com.kvadratin.R.menu.gamemenu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		mEngine.runOnUpdateThread(new Runnable() {
+
+			@Override
+			public void run() {
+				Random rnd = new Random();
+				mFractal.split(mThemes[rnd.nextInt(mThemes.length)], rnd.nextInt(145) + 5);
+				mEngine.getCamera().setCenter(mFractal.getWidth() * 0.5f,
+						mFractal.getHeight() * 0.5f);
+			}
+		});
+
+		return true;
+	}
 }
