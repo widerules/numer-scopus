@@ -29,4 +29,10 @@ public class OrnamentManagerFactory {
 	public static ColorRectOrnamentManager createColorRectOrnamentManager(){
 		return new ColorRectOrnamentManager();
 	}
+	
+	public static ColorSpriteOrnamentManager createColorSpriteOrnamentManager(final Context pContext, final String pAssetBasePath,
+			final String pFileNamePrefix, final TextureManager pTextureManager,
+			final int pTextureSize){
+		return new ColorSpriteOrnamentManager(pContext, pAssetBasePath, pFileNamePrefix, pTextureManager, pTextureSize);
+	}
 }

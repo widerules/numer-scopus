@@ -56,7 +56,7 @@ public class ClearGreyFractalTheme implements IFractalTheme {
 		mActiveTextColorGreen = ColorHelper.green(mActiveTextColor);
 		mActiveTextColorBlue = ColorHelper.blue(mActiveTextColor);	
 		
-		mDisabledTextColor = Color.argb(255, 102, 102, 102);
+		mDisabledTextColor = Color.argb(255, 152, 1, 1);
 		mDisabledTextColorAlpha = ColorHelper.alpha(mDisabledTextColor);
 		mDisabledTextColorRed = ColorHelper.red(mDisabledTextColor);
 		mDisabledTextColorGreen = ColorHelper.green(mDisabledTextColor);
@@ -68,7 +68,7 @@ public class ClearGreyFractalTheme implements IFractalTheme {
 		mNextTextColorGreen = ColorHelper.green(mNextTextColor);
 		mNextTextColorBlue = ColorHelper.blue(mNextTextColor);
 		
-		mIsBorderVisible = true;
+		mIsBorderVisible = false;
 		
 		mBorderPaint = new Paint();		
 		mBorderPaint.setARGB(255, 238, 238, 238);

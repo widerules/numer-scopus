@@ -36,7 +36,7 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private DisplayMetrics mMetrics;
 	private SmoothCamera mCamera;
 
-	private IOrnamentManager mOrnamentManager;
+	private IOrnamentManager[] mOrnaments;
 	private IFontManager mFontManager;
 	private Fractal mFractal;
 	private IFractalTheme[] mThemes;
@@ -74,24 +74,30 @@ public class NumerScopusActivity extends BaseGameActivity {
 						255, 255), 120, 1, false);
 
 		// TODO: Texture size, must be relative to display metrics
-		mOrnamentManager = OrnamentManagerFactory.createAssetOrnamentManager(
-				this, "gfx", "orn_", mEngine.getTextureManager(), 256);
+		mOrnaments = new IOrnamentManager[2];
+		mOrnaments[0] = OrnamentManagerFactory.createAssetOrnamentManager(this,
+				"gfx", "orn_", mEngine.getTextureManager(), 256);
+		mOrnaments[1] = OrnamentManagerFactory
+				.createColorSpriteOrnamentManager(this, "gfx", "mushroom_orn", mEngine
+						.getTextureManager(), 256);
 	}
 
 	@Override
 	public Scene onLoadScene() {
 		mEngine.registerUpdateHandler(new FPSLogger());
 
-		mThemes = new IFractalTheme[3];
+		mThemes = new IFractalTheme[4];
 		mThemes[0] = FractalThemeFactory
 				.createClearGreyFractalTheme(mFontManager);
 		mThemes[1] = FractalThemeFactory.createBaseFractalTheme(mFontManager,
-				mOrnamentManager);
+				mOrnaments[0]);
 		mThemes[2] = FractalThemeFactory.createColorRectFractalTheme(
 				mFontManager, OrnamentManagerFactory
 						.createColorRectOrnamentManager());
-
-		mFractal = new Fractal(mMetrics, mEngine, mThemes[2], 100);
+		mThemes[3] = FractalThemeFactory.createMushroomFractalTheme(
+				mFontManager, mOrnaments[1]);
+		
+		mFractal = new Fractal(mMetrics, mEngine, mThemes[0], 100);
 		mFractal.addClickListener(new IFractalClickListener() {
 
 			@Override
@@ -136,7 +142,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 			@Override
 			public void run() {
 				Random rnd = new Random();
-				mFractal.split(mThemes[rnd.nextInt(mThemes.length)], rnd.nextInt(145) + 5);
+				mFractal.split(mThemes[rnd.nextInt(mThemes.length)], rnd
+						.nextInt(145) + 5);
 				mEngine.getCamera().setCenter(mFractal.getWidth() * 0.5f,
 						mFractal.getHeight() * 0.5f);
 			}

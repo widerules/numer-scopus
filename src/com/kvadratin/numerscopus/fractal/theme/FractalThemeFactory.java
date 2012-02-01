@@ -15,4 +15,8 @@ public class FractalThemeFactory {
 	public static ColorRectFractalTheme createColorRectFractalTheme(IFontManager pFontManager, IOrnamentManager pOrnamentManager){
 		return new ColorRectFractalTheme(pFontManager, pOrnamentManager);
 	}
+	
+	public static MushroomFractalTheme createMushroomFractalTheme(IFontManager pFontManager, IOrnamentManager pOrnamentManager){
+		return new MushroomFractalTheme(pFontManager, pOrnamentManager);
+	}
 }

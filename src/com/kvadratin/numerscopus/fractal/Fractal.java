@@ -89,6 +89,13 @@ public class Fractal {
 				if (pSceneTouchEvent.isActionMove()) {
 
 					Camera camera = mEngine.getCamera();
+
+					boolean isNeedMoveX = mFractal.getWidth() + mFractalPadding
+							* 2 > mEngine.getCamera().getWidth() ? true : false;
+					boolean isNeedMoveY = mFractal.getHeight()
+							+ mFractalPadding * 2 > mEngine.getCamera()
+							.getHeight() ? true : false;
+
 					float x = camera.getCenterX();
 					float y = camera.getCenterY();
 					float dx = mBeginTouchPositionX - pSceneTouchEvent.getX();
@@ -104,19 +111,23 @@ public class Fractal {
 					float bottom = mFractal.getHeight() - camera.getHeight()
 							* 0.5f + mFractalPadding;
 
-					if (x + dx < left)
-						x = left;
-					else if (x + dx > right)
-						x = right;
-					else
-						x += dx;
+					if (isNeedMoveX) {
+						if (x + dx < left)
+							x = left;
+						else if (x + dx > right)
+							x = right;
+						else
+							x += dx;
+					}
 
-					if (y + dy < top)
-						y = top;
-					else if (y + dy > bottom)
-						y = bottom;
-					else
-						y += dy;
+					if (isNeedMoveY) {
+						if (y + dy < top)
+							y = top;
+						else if (y + dy > bottom)
+							y = bottom;
+						else
+							y += dy;
+					}
 
 					if (Math.abs(dx) > 10 || Math.abs(dy) > 10)
 						mIsMoved = true;
