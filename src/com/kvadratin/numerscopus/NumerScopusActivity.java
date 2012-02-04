@@ -7,10 +7,7 @@ import org.anddev.andengine.engine.camera.SmoothCamera;
 import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
-import org.anddev.andengine.entity.IEntity;
-import org.anddev.andengine.entity.modifier.RotationModifier;
 import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.text.Text;
 import org.anddev.andengine.entity.util.FPSLogger;
 import org.anddev.andengine.extension.svg.opengl.texture.atlas.bitmap.SVGBitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.font.FontFactory;
@@ -22,8 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.kvadratin.numerscopus.fractal.Fractal;
-import com.kvadratin.numerscopus.fractal.event.FractalTouchEvent;
-import com.kvadratin.numerscopus.fractal.event.IFractalClickListener;
 import com.kvadratin.numerscopus.fractal.theme.FractalThemeFactory;
 import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
 import com.kvadratin.numerscopus.fractal.theme.font.FontManagerFactory;
@@ -78,8 +73,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 		mOrnaments[0] = OrnamentManagerFactory.createAssetOrnamentManager(this,
 				"gfx", "orn_", mEngine.getTextureManager(), 256);
 		mOrnaments[1] = OrnamentManagerFactory
-				.createColorSpriteOrnamentManager(this, "gfx", "mushroom_orn", mEngine
-						.getTextureManager(), 256);
+				.createColorSpriteOrnamentManager(this, "gfx", "mushroom_orn",
+						mEngine.getTextureManager(), 256);
 	}
 
 	@Override
@@ -96,31 +91,8 @@ public class NumerScopusActivity extends BaseGameActivity {
 						.createColorRectOrnamentManager());
 		mThemes[3] = FractalThemeFactory.createMushroomFractalTheme(
 				mFontManager, mOrnaments[1]);
-		
-		mFractal = new Fractal(mMetrics, mEngine, mThemes[0], 100);
-		mFractal.addClickListener(new IFractalClickListener() {
 
-			@Override
-			public void onClick(FractalTouchEvent e) {
-
-				if (e.getTouchedPart() != null) {
-					IEntity en = e.getTouchedPart().getOrnamentEntity();
-
-					if (en != null) {
-						en.setIgnoreUpdate(false);
-						en.registerEntityModifier(new RotationModifier(2, 0,
-								360));
-					}
-
-					Text txt = e.getTouchedPart().getNumberText();
-					txt.setIgnoreUpdate(false);
-					txt.setColor(e.getSource().getTheme()
-							.getDisabledTextColorRed(), e.getSource()
-							.getTheme().getDisabledTextColorGreen(), e
-							.getSource().getTheme().getDisabledTextColorBlue());
-				}
-			}
-		});
+		mFractal = new Fractal(mMetrics, mEngine, mThemes[0], 100);		
 
 		mEngine.getCamera().setCenter(mFractal.getWidth() * 0.5f,
 				mFractal.getHeight() * 0.5f);

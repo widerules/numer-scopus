@@ -1,14 +1,16 @@
 package com.kvadratin.numerscopus.fractal.theme;
 
+import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.anddev.andengine.entity.modifier.RotationModifier;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.IBackground;
 
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.kvadratin.numerscopus.fractal.NumberFractalPart;
 import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.theme.ornament.IOrnamentManager;
-import com.kvadratin.numerscopus.utils.ColorHelper;
 
 public class MushroomFractalTheme implements IFractalTheme {
 	
@@ -26,27 +28,7 @@ public class MushroomFractalTheme implements IFractalTheme {
 	public int getActiveTextColor() {
 		return Color.BLACK;
 	}
-
-	@Override
-	public float getActiveTextColorAlpha() {
-		return 1f;
-	}
-
-	@Override
-	public float getActiveTextColorBlue() {
-		return 0f;
-	}
-
-	@Override
-	public float getActiveTextColorGreen() {
-		return 0f;
-	}
-
-	@Override
-	public float getActiveTextColorRed() {
-		return 0f;
-	}
-
+	
 	@Override
 	public IBackground getBackground() {
 		return mBackground;
@@ -59,29 +41,9 @@ public class MushroomFractalTheme implements IFractalTheme {
 
 	@Override
 	public int getDisabledTextColor() {
-		return Color.GRAY;
+		return Color.BLUE;
 	}
-
-	@Override
-	public float getDisabledTextColorAlpha() {
-		return 1f;
-	}
-
-	@Override
-	public float getDisabledTextColorBlue() {
-		return ColorHelper.blue(Color.GRAY);
-	}
-
-	@Override
-	public float getDisabledTextColorGreen() {
-		return ColorHelper.green(Color.GRAY);
-	}
-
-	@Override
-	public float getDisabledTextColorRed() {
-		return ColorHelper.red(Color.GRAY);
-	}
-
+	
 	@Override
 	public IFontManager getFontManager() {
 		return mFontManager;
@@ -89,29 +51,9 @@ public class MushroomFractalTheme implements IFractalTheme {
 
 	@Override
 	public int getNextTextColor() {
-		return Color.BLUE;
+		return Color.argb(255, 152, 1, 1);
 	}
-
-	@Override
-	public float getNextTextColorAlpha() {
-		return 1f;
-	}
-
-	@Override
-	public float getNextTextColorBlue() {
-		return ColorHelper.blue(Color.BLUE);
-	}
-
-	@Override
-	public float getNextTextColorGreen() {
-		return ColorHelper.green(Color.BLUE);
-	}
-
-	@Override
-	public float getNextTextColorRed() {
-		return ColorHelper.red(Color.BLUE);
-	}
-
+	
 	@Override
 	public IOrnamentManager getOrnamentManager() {
 		return mOrnamentManager;
@@ -121,30 +63,20 @@ public class MushroomFractalTheme implements IFractalTheme {
 	public int getTextColor() {
 		return Color.DKGRAY;
 	}
-
-	@Override
-	public float getTextColorAlpha() {
-		return 1f;
-	}
-
-	@Override
-	public float getTextColorBlue() {
-		return ColorHelper.blue(Color.DKGRAY);
-	}
-
-	@Override
-	public float getTextColorGreen() {
-		return ColorHelper.green(Color.DKGRAY);
-	}
-
-	@Override
-	public float getTextColorRed() {
-		return ColorHelper.red(Color.DKGRAY);
-	}
-
+	
 	@Override
 	public boolean isBorderVisible() {
 		return false;
+	}
+
+	@Override
+	public IEntityModifier getOnClickOrnametModifier(NumberFractalPart pPart) {
+		return new RotationModifier(2, 0, 360);
+	}
+
+	@Override
+	public IEntityModifier getOnClickTextModifier(NumberFractalPart pPart) {
+		return null;
 	}
 
 }

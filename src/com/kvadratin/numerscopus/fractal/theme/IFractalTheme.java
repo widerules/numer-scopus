@@ -1,9 +1,11 @@
 package com.kvadratin.numerscopus.fractal.theme;
 
+import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.scene.background.IBackground;
 
 import android.graphics.Paint;
 
+import com.kvadratin.numerscopus.fractal.NumberFractalPart;
 import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.theme.ornament.IOrnamentManager;
 
@@ -55,21 +57,14 @@ public interface IFractalTheme {
 	 * @return
 	 */
 	int getTextColor();	
-	float getTextColorAlpha();
-	float getTextColorRed();
-	float getTextColorGreen();
-	float getTextColorBlue();
-
+	
 	/**
 	 * Цвет шрифта для последнего числа на которое было произведено нажатие
 	 * 
 	 * @return
 	 */
 	int getActiveTextColor();
-	float getActiveTextColorAlpha();
-	float getActiveTextColorRed();
-	float getActiveTextColorGreen();
-	float getActiveTextColorBlue();
+	
 
 	/**
 	 * Цвет шрифта для чисел на которые уже нажимали
@@ -77,20 +72,25 @@ public interface IFractalTheme {
 	 * @return
 	 */
 	int getDisabledTextColor();
-	float getDisabledTextColorAlpha();
-	float getDisabledTextColorRed();
-	float getDisabledTextColorGreen();
-	float getDisabledTextColorBlue();
-
-
+	
 	/**
 	 * Цвет шрифта для подсветки следующего числа числа
 	 * 
 	 * @return
 	 */
 	int getNextTextColor();
-	float getNextTextColorAlpha();
-	float getNextTextColorRed();
-	float getNextTextColorGreen();
-	float getNextTextColorBlue();
+	
+	/**
+	 * Вернет анимацию для орнамента, которая будет воспроизведена при нажатии
+	 * 
+	 * @return
+	 */
+	IEntityModifier getOnClickOrnametModifier(NumberFractalPart pPart);
+	
+	/**
+	 * Вернет анимацию для текста, которая будет воспроизведена при нажатии
+	 * 
+	 * @return
+	 */
+	IEntityModifier getOnClickTextModifier(NumberFractalPart pPart);
 }
