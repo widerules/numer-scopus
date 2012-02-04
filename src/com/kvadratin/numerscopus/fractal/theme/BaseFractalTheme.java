@@ -1,84 +1,51 @@
 package com.kvadratin.numerscopus.fractal.theme;
 
+import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
+import org.anddev.andengine.entity.modifier.ScaleAtModifier;
+import org.anddev.andengine.entity.modifier.SequenceEntityModifier;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
 import org.anddev.andengine.entity.scene.background.IBackground;
 
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.kvadratin.numerscopus.fractal.NumberFractalPart;
 import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.theme.ornament.IOrnamentManager;
-import com.kvadratin.numerscopus.utils.ColorHelper;
 
 public class BaseFractalTheme implements IFractalTheme {
-	
+
 	int mTextColor;
-	float mTextColorAlpha;
-	float mTextColorRed;
-	float mTextColorGreen;
-	float mTextColorBlue;
-	
 	int mActiveTextColor;
-	float mActiveTextColorAlpha;
-	float mActiveTextColorRed;
-	float mActiveTextColorGreen;
-	float mActiveTextColorBlue;
-	
 	int mDisabledTextColor;
-	float mDisabledTextColorAlpha;
-	float mDisabledTextColorRed;
-	float mDisabledTextColorGreen;
-	float mDisabledTextColorBlue;
-	
 	int mNextTextColor;
-	float mNextTextColorAlpha;
-	float mNextTextColorRed;
-	float mNextTextColorGreen;
-	float mNextTextColorBlue;
-	
+
 	boolean mIsBorderVisible;
 	Paint mBorderPaint;
-	
+
 	IBackground mBackground;
 	IFontManager mFontManager;
 	IOrnamentManager mOrnamentManager;
-	
-	public BaseFractalTheme(IFontManager pFontManager, IOrnamentManager pOrnamentManager){
+
+	public BaseFractalTheme(IFontManager pFontManager,
+			IOrnamentManager pOrnamentManager) {
 		mTextColor = Color.argb(255, 68, 24, 24);
-		mTextColorAlpha = ColorHelper.alpha(mTextColor);
-		mTextColorRed = ColorHelper.red(mTextColor);
-		mTextColorGreen = ColorHelper.green(mTextColor);
-		mTextColorBlue = ColorHelper.blue(mTextColor);		
-		
 		mActiveTextColor = Color.argb(255, 212, 0, 0);
-		mActiveTextColorAlpha = ColorHelper.alpha(mActiveTextColor);
-		mActiveTextColorRed = ColorHelper.red(mActiveTextColor);
-		mActiveTextColorGreen = ColorHelper.green(mActiveTextColor);
-		mActiveTextColorBlue = ColorHelper.blue(mActiveTextColor);	
-		
-		mDisabledTextColor = Color.argb(255, 86, 82, 72);
-		mDisabledTextColorAlpha = ColorHelper.alpha(mDisabledTextColor);
-		mDisabledTextColorRed = ColorHelper.red(mDisabledTextColor);
-		mDisabledTextColorGreen = ColorHelper.green(mDisabledTextColor);
-		mDisabledTextColorBlue = ColorHelper.blue(mDisabledTextColor);
-		
+		mDisabledTextColor = Color.DKGRAY;
 		mNextTextColor = Color.argb(255, 1, 51, 151);
-		mNextTextColorAlpha = ColorHelper.alpha(mNextTextColor);
-		mNextTextColorRed = ColorHelper.red(mNextTextColor);
-		mNextTextColorGreen = ColorHelper.green(mNextTextColor);
-		mNextTextColorBlue = ColorHelper.blue(mNextTextColor);
-		
-		mIsBorderVisible = true;
-		
-		mBorderPaint = new Paint();		
+
+		mIsBorderVisible = false;
+
+		mBorderPaint = new Paint();
 		mBorderPaint.setARGB(255, 255, 109, 27);
 		mBorderPaint.setStrokeWidth(3);
-		
+
 		mBackground = new ColorBackground(1f, 1f, 1f);
 		mFontManager = pFontManager;
 		mOrnamentManager = pOrnamentManager;
 	}
-	
+
 	@Override
 	public int getActiveTextColor() {
 		return mActiveTextColor;
@@ -125,83 +92,18 @@ public class BaseFractalTheme implements IFractalTheme {
 	}
 
 	@Override
-	public float getActiveTextColorAlpha() {
-		return mActiveTextColorAlpha;
+	public IEntityModifier getOnClickOrnametModifier(NumberFractalPart pPart) {
+		return null;
 	}
 
 	@Override
-	public float getActiveTextColorBlue() {
-		return mActiveTextColorBlue;
-	}
+	public IEntityModifier getOnClickTextModifier(NumberFractalPart pPart) {
+		IEntity text = pPart.getNumberText();
 
-	@Override
-	public float getActiveTextColorGreen() {
-		return mActiveTextColorGreen;
+		return new SequenceEntityModifier(new ScaleAtModifier(0.1f, text
+				.getScaleX(), text.getScaleX() * 0.9f, text.getScaleCenterX(),
+				text.getScaleCenterY()), new ScaleAtModifier(0.1f, text
+				.getScaleX() * 0.9f, text.getScaleX(), text.getScaleCenterX(),
+				text.getScaleCenterY()));
 	}
-
-	@Override
-	public float getActiveTextColorRed() {
-		return mActiveTextColorRed;
-	}
-
-	@Override
-	public float getDisabledTextColorAlpha() {
-		return mDisabledTextColorAlpha;
-	}
-
-	@Override
-	public float getDisabledTextColorBlue() {
-		return mDisabledTextColorBlue;
-	}
-
-	@Override
-	public float getDisabledTextColorGreen() {
-		return mDisabledTextColorGreen;
-	}
-
-	@Override
-	public float getDisabledTextColorRed() {
-		return mDisabledTextColorRed;
-	}
-
-	@Override
-	public float getNextTextColorAlpha() {
-		return mNextTextColorAlpha;
-	}
-
-	@Override
-	public float getNextTextColorBlue() {
-		return mNextTextColorBlue;
-	}
-
-	@Override
-	public float getNextTextColorGreen() {
-		return mNextTextColorGreen;
-	}
-
-	@Override
-	public float getNextTextColorRed() {
-		return mNextTextColorRed;
-	}
-
-	@Override
-	public float getTextColorAlpha() {
-		return mTextColorAlpha;
-	}
-
-	@Override
-	public float getTextColorBlue() {
-		return mTextColorBlue;
-	}
-
-	@Override
-	public float getTextColorGreen() {
-		return mTextColorGreen;
-	}
-
-	@Override
-	public float getTextColorRed() {
-		return mTextColorRed;
-	}
-
 }

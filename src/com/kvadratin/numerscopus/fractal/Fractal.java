@@ -8,6 +8,7 @@ import java.util.Stack;
 import org.anddev.andengine.engine.Engine;
 import org.anddev.andengine.engine.camera.Camera;
 import org.anddev.andengine.entity.IEntity;
+import org.anddev.andengine.entity.modifier.IEntityModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.sprite.Sprite;
 import org.anddev.andengine.entity.text.Text;
@@ -29,6 +30,7 @@ import com.kvadratin.numerscopus.fractal.theme.IFractalTheme;
 import com.kvadratin.numerscopus.fractal.theme.font.IFontManager;
 import com.kvadratin.numerscopus.fractal.theme.ornament.IOrnamentManager;
 import com.kvadratin.numerscopus.utils.BitmapTextureSource;
+import com.kvadratin.numerscopus.utils.ColorHelper;
 import com.kvadratin.numerscopus.utils.TextureHelper;
 
 public class Fractal {
@@ -79,10 +81,43 @@ public class Fractal {
 
 				if (pSceneTouchEvent.isActionUp()) {
 					if (!mIsMoved) {
-						fireClick(new FractalTouchEvent(mSelf,
-								(NumberFractalPart) mFractal.getPart(
-										mBeginTouchPositionX,
-										mBeginTouchPositionY), false));
+						NumberFractalPart part = (NumberFractalPart) mFractal
+								.getPart(mBeginTouchPositionX,
+										mBeginTouchPositionY);
+						
+						if (part != null)
+							if (fireClick(new FractalTouchEvent(mSelf, part,
+									false))) {
+
+								IEntity orn = part.getOrnamentEntity();
+
+								if (orn != null) {
+									IEntityModifier ornModifier = mFractalTheme
+											.getOnClickOrnametModifier(part);
+									if (ornModifier != null) {
+										orn.setIgnoreUpdate(false);
+										orn.registerEntityModifier(ornModifier);
+									}
+								}
+
+								IEntity text = part.getNumberText();
+								if (text != null) {
+									IEntityModifier textModifier = mFractalTheme
+											.getOnClickTextModifier(part);
+									if (textModifier != null) {
+										text.setIgnoreUpdate(false);
+										text
+												.registerEntityModifier(textModifier);
+									}
+
+									text.setColor(ColorHelper.red(mFractalTheme
+											.getDisabledTextColor()),
+											ColorHelper.green(mFractalTheme
+													.getDisabledTextColor()),
+											ColorHelper.blue(mFractalTheme
+													.getDisabledTextColor()));
+								}
+							}
 					}
 				}
 
@@ -247,9 +282,10 @@ public class Fractal {
 						.toString(num + 1));
 
 				txt.setIgnoreUpdate(true);
-				txt.setColor(mFractalTheme.getTextColorRed(), mFractalTheme
-						.getTextColorGreen(), mFractalTheme.getTextColorBlue(),
-						mFractalTheme.getTextColorAlpha());
+				txt.setColor(ColorHelper.red(mFractalTheme.getTextColor()),
+						ColorHelper.green(mFractalTheme.getTextColor()),
+						ColorHelper.blue(mFractalTheme.getTextColor()),
+						ColorHelper.alpha(mFractalTheme.getTextColor()));
 
 				txt.setScaleCenter(0, 0);
 				txt.setScale(Math.min(part.getWidth()
@@ -442,10 +478,21 @@ public class Fractal {
 		mClickListeners.clear();
 	}
 
-	protected void fireClick(FractalTouchEvent e) {
+	protected boolean fireClick(FractalTouchEvent e) {
 		Iterator<IFractalClickListener> i = mClickListeners.iterator();
+		boolean isCanceled = false;
+
 		while (i.hasNext()) {
-			i.next().onClick(e);
+			isCanceled = i.next().isCanceled(e);
 		}
+
+		if (!isCanceled) {
+			i = mClickListeners.iterator();
+			while (i.hasNext()) {
+				i.next().onClick(e);
+			}
+		}
+
+		return !isCanceled;
 	}
 }
