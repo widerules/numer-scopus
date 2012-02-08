@@ -92,7 +92,7 @@ public class NumerScopusActivity extends BaseGameActivity {
 		mThemes[3] = FractalThemeFactory.createMushroomFractalTheme(
 				mFontManager, mOrnaments[1]);
 
-		mFractal = new Fractal(mMetrics, mEngine, mThemes[0], 100);		
+		mFractal = new Fractal(mMetrics, mEngine, mThemes[3], 50);		
 
 		mEngine.getCamera().setCenter(mFractal.getWidth() * 0.5f,
 				mFractal.getHeight() * 0.5f);
@@ -115,7 +115,7 @@ public class NumerScopusActivity extends BaseGameActivity {
 			public void run() {
 				Random rnd = new Random();
 				mFractal.split(mThemes[rnd.nextInt(mThemes.length)], rnd
-						.nextInt(145) + 5);
+						.nextInt(45) + 5);
 				mEngine.getCamera().setCenter(mFractal.getWidth() * 0.5f,
 						mFractal.getHeight() * 0.5f);
 			}
