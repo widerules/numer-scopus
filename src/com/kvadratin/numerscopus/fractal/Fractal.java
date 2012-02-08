@@ -84,7 +84,7 @@ public class Fractal {
 						NumberFractalPart part = (NumberFractalPart) mFractal
 								.getPart(mBeginTouchPositionX,
 										mBeginTouchPositionY);
-						
+
 						if (part != null)
 							if (fireClick(new FractalTouchEvent(mSelf, part,
 									false))) {
@@ -106,8 +106,7 @@ public class Fractal {
 											.getOnClickTextModifier(part);
 									if (textModifier != null) {
 										text.setIgnoreUpdate(false);
-										text
-												.registerEntityModifier(textModifier);
+										text.registerEntityModifier(textModifier);
 									}
 
 									text.setColor(ColorHelper.red(mFractalTheme
