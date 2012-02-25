@@ -15,6 +15,7 @@ import android.util.Log;
 public class AssetFontManager implements IFontManager {
 
 	private Font[] mFontLibrary;
+	private String[] mFontFileNames;
 	private String mAssetBasePath;
 	private String mFileNamePrefix;
 
@@ -83,6 +84,7 @@ public class AssetFontManager implements IFontManager {
 				if (count > 0) {
 					
 					mFontLibrary = new Font[count];
+					mFontFileNames = new String[count];
 					count = 0;
 
 					for (int i = 0; i < list.length; i++) {
@@ -114,6 +116,7 @@ public class AssetFontManager implements IFontManager {
 								}
 
 								mTextureManager.loadTexture(fontTexture);
+								mFontFileNames[count] = list[i];
 								mFontLibrary[count++] = font;
 
 							} catch (Exception ex) {
@@ -151,6 +154,19 @@ public class AssetFontManager implements IFontManager {
 	@Override
 	public float getStrokeWidth() {
 		return mStrokeWidth;
+	}
+
+	@Override
+	public Font get(String pFontFileName) {
+		Font result = null;
+		
+		for(int i=0; i < size(); i++){
+			if(mFontFileNames[i].equalsIgnoreCase(pFontFileName)){
+				result = mFontLibrary[i];
+				break;
+			}
+		}		
+		return result;
 	}
 
 }

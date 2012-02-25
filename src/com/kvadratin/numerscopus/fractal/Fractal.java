@@ -42,6 +42,7 @@ public class Fractal {
 	protected Sprite mFractalSprite;
 	protected NumberFractalPart[] mNumbers;
 	protected float mFractalPadding;
+	protected float mFractalPaddingTop;
 
 	protected FractalSplitterManager mSplitters;
 	protected IFractalTheme mFractalTheme;
@@ -61,7 +62,8 @@ public class Fractal {
 		mFractalTheme = pFractalTheme;
 		mEngine = pEngine;
 		mFractalPadding = 10;
-
+		mFractalPaddingTop = 60;
+		
 		// Создаем сцену для фрактала
 		mScene = new Scene() {
 
@@ -127,7 +129,7 @@ public class Fractal {
 					boolean isNeedMoveX = mFractal.getWidth() + mFractalPadding
 							* 2 > mEngine.getCamera().getWidth() ? true : false;
 					boolean isNeedMoveY = mFractal.getHeight()
-							+ mFractalPadding * 2 > mEngine.getCamera()
+							+ mFractalPadding + mFractalPaddingTop > mEngine.getCamera()
 							.getHeight() ? true : false;
 
 					float x = camera.getCenterX();
@@ -141,7 +143,7 @@ public class Fractal {
 							* 0.5f + mFractalPadding;
 
 					float top = mFractal.getY() + camera.getHeight() * 0.5f
-							- mFractalPadding;
+							- mFractalPaddingTop;
 					float bottom = mFractal.getHeight() - camera.getHeight()
 							* 0.5f + mFractalPadding;
 
@@ -442,6 +444,14 @@ public class Fractal {
 
 	public float getPadding() {
 		return mFractalPadding;
+	}
+	
+	public float getPaddingTop(){
+		return mFractalPaddingTop;
+	}
+	
+	public void setPaddingTop(final float padding){
+		mFractalPaddingTop = padding;
 	}
 
 	public Scene getScene() {

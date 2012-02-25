@@ -4,7 +4,7 @@ import org.anddev.andengine.opengl.font.Font;
 
 public interface IFontManager {
 	/**
-	 * Производит загрузку шрифтов	 
+	 * Производит загрузку шрифтов
 	 */
 	void load();
 
@@ -27,6 +27,15 @@ public interface IFontManager {
 	 *            Идентификатор шрифта
 	 */
 	Font get(final int pFontId);
+
+	/**
+	 * Возвращает шрифт по названию файла
+	 * 
+	 * @param pFontFileName
+	 *            Имя файла
+	 * @return
+	 */
+	Font get(final String pFontFileName);
 
 	/**
 	 * Возвращает цвет шрифта
