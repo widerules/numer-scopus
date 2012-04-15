@@ -36,6 +36,10 @@ public final class ResourceManager {
 		// Загружаем текстуры
 		loadTexture(GFX_STATUS_STAR, 16, 16, "score.svg");
 		loadTexture(GFX_STATUS_TIME, 16, 16, "timer.svg");
+		
+		//loadTexture(GFX_MSGBOX_BCG, 64, 64, "dialog.9.svg");
+		//loadTexture(GFX_MSGBOX_ICON, 32, 32, "i_icon.svg");
+		//loadTexture(GFX_MSGBOX_CLOSE, 64, 64, "btn_close.svg");
 
 		// Загружаем шрифты
 		mFonts = new IFontManager[FONT_MANAGER_COUNT];
@@ -95,9 +99,15 @@ public final class ResourceManager {
 	public final static int FONT_MANAGER_MENU = 0;
 	public final static int FONT_MANAGER_FRACTAL = 1;
 
+	
 	public final static int GFX_COUNT = 2;
+	// StatusBar
 	public final static int GFX_STATUS_STAR = 0;
 	public final static int GFX_STATUS_TIME = 1;
+	// MessageBox
+	//public final static int GFX_MSGBOX_BCG = 2;
+	//public final static int GFX_MSGBOX_ICON = 3;
+	//public final static int GFX_MSGBOX_CLOSE = 4;
 
 	public final static int THEMES_COUNT = 4;
 	public final static int THEME_BASE = 0;
@@ -117,7 +127,7 @@ public final class ResourceManager {
 
 	private BitmapTextureAtlas[] mTextures;
 	private TextureRegion[] mRegions;
-
+	
 	// ---------------------------------------------------------------
 	// Методы
 	// ---------------------------------------------------------------
@@ -129,7 +139,7 @@ public final class ResourceManager {
 		mRegions[indx] = SVGBitmapTextureAtlasTextureRegionFactory
 				.createFromAsset(mTextures[indx], mContext, name, width,
 						height, 0, 0);
-
+		
 		mEngine.getTextureManager().loadTexture(mTextures[indx]);
 	}
 
@@ -143,5 +153,9 @@ public final class ResourceManager {
 
 	public Sprite getSprite(final int indx) {
 		return new Sprite(0, 0, mRegions[indx]);
+	}
+	
+	public TextureRegion getTextureRegion(final int indx) {
+		return mRegions[indx];
 	}
 }
