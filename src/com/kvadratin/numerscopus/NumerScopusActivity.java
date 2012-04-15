@@ -8,16 +8,23 @@ import org.anddev.andengine.engine.options.EngineOptions;
 import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.entity.scene.menu.item.TextMenuItem;
 import org.anddev.andengine.entity.util.FPSLogger;
+import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.anddev.andengine.opengl.texture.region.TextureRegion;
+import org.anddev.andengine.opengl.texture.region.TextureRegionFactory;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.kvadratin.numerscopus.fractal.Fractal;
+import com.kvadratin.numerscopus.ui.MessageBox;
 import com.kvadratin.numerscopus.ui.StatusBar;
+import com.kvadratin.numerscopus.utils.ninepatch.NinePatchTextureRegionBatch;
 
 public class NumerScopusActivity extends BaseGameActivity {
 
@@ -30,7 +37,10 @@ public class NumerScopusActivity extends BaseGameActivity {
 	private ResourceManager mResources;
 	private Fractal mFractal;
 	private StatusBar mBar;
-
+	
+	//private NinePatchTextureRegionBatch mDialogRegion;
+	//private MessageBox msgBox;
+	
 	@Override
 	public void onLoadComplete() {
 
@@ -79,9 +89,15 @@ public class NumerScopusActivity extends BaseGameActivity {
 				"menu_LinLibertine_DR.otf"), mResources.getFontManager(
 				ResourceManager.FONT_MANAGER_MENU).get(
 				"menu_lerotica-regular.otf"));
-
+		
+		//TextureRegion tr = mResources.getTextureRegion(ResourceManager.GFX_MSGBOX_BCG);
+		//mDialogRegion = new NinePatchTextureRegionBatch(tr.getTexture(), tr.getTexturePositionX(), tr.getTexturePositionY(), 300, 300, new Rect(12,12,32,32), new Rect(12,12,32,32));
+		//msgBox = new MessageBox("zzz", "xxx", 
+		//		mResources.getTextureRegion(ResourceManager.GFX_MSGBOX_ICON),
+		//		new TextMenuItem(0, pFont, pText)
+		//		mResources.getTextureRegion(ResourceManager.GFX_MSGBOX_CLOSE), pTitleFont, pMessageFont, pRegion, pX, pY, pWidth, pHeight)
 	}
-
+	
 	@Override
 	public Scene onLoadScene() {
 		mEngine.registerUpdateHandler(new FPSLogger());
